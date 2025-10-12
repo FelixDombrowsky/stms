@@ -1,0 +1,4 @@
+prisma
+
+npx prisma migrate dev --name ข้อความที่แก้
+npx prisma db seed

@@ -1,0 +1,104 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// ประเภทของ probe (แม่)
+/// 1 ProbeType -> มีหลาย ProbeSetting
+model probe_type {
+  probe_type_id     Int            @id
+  probe_type_name   String         @db.VarChar(50)
+
+  // Relation
+  probe_settings    probe_setting[]
+}
+
+/// การตั้งค่าของ probe แต่ละตัว
+/// N probe_setting -> 1 probe_type
+model probe_setting {
+  probe_id        Int     @id
+
+  // FK ไป probe_type
+  probe_type_id   Int?
+  probe_type      probe_type?   @relation(fields: [probe_type_id], references: [probe_type_id])
+
+  // Address และ Scale
+  oil_h_address   Int?
+  oil_h_scale     Float?
+  water_h_address Int?
+  water_h_scale   Float?
+  temp_address    Int?
+  temp_scale      Float?
+
+  // Format settings
+  format          String? @db.VarChar(20) 
+  function_code   String? @db.VarChar(10) 
+  address_length  Int?    @default(2)
+
+  // tank_setting relation (1 probe_setting -> many tank_setting)
+  tank_settings   tank_setting[]
+}
+
+/// ประเภทของเชื้อเพลิง (แม่)
+/// 1 fuel_type -> N fuel_name
+model fuel_type {
+  fuel_type_code String   @id @db.VarChar(10)     // เช่น GAS, DSL, E20
+  fuel_type_name String   @db.VarChar(50)
+  density        Decimal?   @db.Decimal(10, 2)
+
+  // Relation
+  fuel_names     fuel_name[]
+}
+
+
+/// ชื่อเชื้อเพลิงแต่ละชนิด (ลูก)
+/// N fuel_name -> 1 fuel_type
+model fuel_name {
+  fuel_code     String   @id @db.VarChar(10)    // เช่น G91, G95, B20
+  fuel_name     String   @db.VarChar(50)
+  fuel_type_code String   @db.VarChar(10)        // FK ไป fuel_type
+  description   String?  @db.Text
+  fuel_color    String?  @db.VarChar(50)
+
+  // Relation
+  fuel_type     fuel_type @relation(fields: [fuel_type_code], references: [fuel_type_code])
+
+  // Relation with tank_setting (1 fuel_name -> many tank_setting)
+  tank_settings tank_setting[]
+}
+
+
+/// การตั้งค่าของถังน้ำมันแต่ละใบ
+model tank_setting {
+  code               String   @id @db.VarChar(10)   // เช่น 'T001', 'TK-A1'
+  tank_name          String   @db.VarChar(100)
+
+  // --- Foreign Keys ---
+  probe_id           Int
+  probe_setting      probe_setting @relation(fields: [probe_id], references: [probe_id])
+
+  fuel_code          String   @db.VarChar(10)
+  fuel_name          fuel_name     @relation(fields: [fuel_code], references: [fuel_code])
+
+  // --- Tank properties ---
+  capacity_l         Decimal? @db.Decimal(12, 2)
+  tank_type          Int?
+  vertical_mm        Decimal? @db.Decimal(12, 2)
+  horizontal_mm      Decimal? @db.Decimal(12, 2)
+  length_mm          Decimal? @db.Decimal(12, 2)
+  cal_capacity_l     Decimal? @db.Decimal(12, 2)
+  comp_oil_mm        Decimal? @db.Decimal(12, 2)
+  comp_water_mm      Decimal? @db.Decimal(12, 2)
+  high_alarm_l       Decimal? @db.Decimal(12, 2)
+  high_alert_l       Decimal? @db.Decimal(12, 2)
+  low_alarm_l        Decimal? @db.Decimal(12, 2)
+  water_high_alarm_l Decimal? @db.Decimal(12, 2)
+
+  // --- Auto Calibrate ---
+  auto_status        Int      @default(0)   // 0 = off, 1 = on
+}
