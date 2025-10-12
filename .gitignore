@@ -1,0 +1,29 @@
+# Node
+node_modules/
+npm-debug.log
+yarn.lock
+
+# Environment Variables
+.env
+*.env
+
+# Docker Volumes / Data
+docker/volumes/
+**/mysql_data/
+**/influxdb_data/
+
+# Logs
+logs/
+*.log
+
+# Build files
+dist/
+build/
+
+# Prisma generated client (ถ้าต้อง Build ใหม่เอง)
+backend/generated
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/

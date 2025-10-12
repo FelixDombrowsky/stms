@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: stms_db
+      MYSQL_USER: ${MYSQL_USER} 
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD} 
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql # Bind mount -> เก็บใน folder volumes
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USERNAME}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD} 
+      DOCKER_INFLUXDB_INIT_ORG: stms_org
+      DOCKER_INFLUXDB_INIT_BUCKET: fuel_level_data  #bucket คือ database ให้ influx เก็บเฉพาะ fuel_level ส่วน fuel_load กับ leak_test ไปเก็บใน MySQL, measurement คือ table
+      DOCKER_INFLUXDB_INIT_RETENTION: 52w # เก็บข้อมูล 1 ปีแล้วลบ
+    volumes:
+      - ./volumes/influxdb:/var/lib/influxdb2
+
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql # ให้ mysql พร้อมก่อน
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql_db # ชี้ไปยัง service mysql 
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000" 
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data 
+    depends_on:
+      - mysql
+      - influxdb
+      - phpmyadmin
+
+volumes:
+  portainer_data:  # Named volume -> Docker จัดการข้อมูลให้
