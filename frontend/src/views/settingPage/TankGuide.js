@@ -30,19 +30,17 @@ import { cilPlus, cilPen, cilPencil, cilTrash, cilArrowCircleBottom, cilArrowCir
 const TankGuide = () => {
   // state
   const [tanks, setTanks] = useState([])
+  const [allTankCal, setAllTankCal] = useState([])
+  const [tankCal, setTankCal] = useState([])
+  const [tankCalFilter, setTankCalFilter] = useState([])
 
   const [tankCode, setTankCode] = useState('')
   const [heightStep, setHeightStep] = useState(10)
   const [model, setModel] = useState(1)
-  const [horizontal, setHorizontal] = useState('')
-  const [vertical, setVertical] = useState('')
-  const [tankType, setTankType] = useState('')
-  const [tankLength, setTankLength] = useState('')
 
-  const [isOn, setIsOn] = useState(false)
+  const [autoIsOn, setAutoIsOn] = useState(false)
+  const [autoMode, setAutoMode] = useState(false)
 
-  // [{height,volume},{height,volume},...]
-  const [defaultTable, setDefaultTable] = useState([])
   const [manualTable, setManualTable] = useState([])
   const [tankAdjustTable, setTankAdjustTable] = useState([])
   // Model State
@@ -50,68 +48,6 @@ const TankGuide = () => {
   const [showTrainModal, setShowTrainModal] = useState(false)
 
   // mock data
-
-  const checkTankCode = () => {
-    if (tanks.length === 0) {
-      return alert('No Tanks')
-    }
-    for (let i = 0; i < tanks.length; i++) {
-      if (tanks[i].code === tankCode) {
-        console.log('Tank code :', tankCode)
-        console.log(`Tank ${tankCode}:`, tanks[i])
-        let a = tanks[i].horizontal_mm
-        let b = tanks[i].vertical_mm
-        let L = tanks[i].length_mm
-        let type = tanks[i].tank_type
-        setHorizontal(a)
-        setVertical(b)
-        setTankLength(L)
-        setTankType(type)
-
-        defaultCal(a, b, L, type)
-      }
-    }
-  }
-
-  const defaultCal = (a, b, L, type) => {
-    const rx = a / 2 // semi-axis x
-    const ry = b / 2 // semi-axis y
-    const points = []
-
-    // ถังแนวนอน (ของเหลวสูง 0..b)
-    if (type === 1) {
-      for (let h = 0; h <= b; h += Number(heightStep)) {
-        // map h -> u ในช่วง [-1, 1]
-        const uRaw = h / ry - 1
-        const u = Math.max(-1, Math.min(1, uRaw))
-        const sqrtTerm = Math.sqrt(Math.max(0, 1 - u * u)) // ป้องกันค่าลบใน sqrt
-
-        // พื้นที่หน้าตัดวงรีส่วนที่จมอยู่ A(h)
-        const A = rx * ry * (u * sqrtTerm + Math.asin(u) + Math.PI / 2)
-
-        // ปริมาตร (ลิตร)
-        const volL = (A * L) / 1_000_000
-
-        // push ข้อมูลลง array
-        points.push({ height: h, volume: volL.toFixed(2) })
-
-        // console.log(`h = ${h} mm, Volume = ${volL.toFixed(2)} L`)
-      }
-    } else {
-      // ถังแนวตั้ง (ถ้าถังเป็นทรงกระบอกฐานวงรี: พื้นที่ฐานคงที่ = π * rx * ry)
-      // ที่ระดับ h: V = (พื้นที่ฐาน) * h
-      for (let h = 0; h <= L; h += Number(heightStep)) {
-        const baseArea = Math.PI * rx * ry // mm²
-        const volL = (baseArea * h) / 1_000_000 // mm³ -> L
-        // push ข้อมูลลง array
-        points.push({ height: h, volume: volL.toFixed(2) })
-
-        // console.log(`h = ${h} mm, Volume = ${volL.toFixed(2)} L`)
-      }
-    }
-
-    setDefaultTable(points)
-  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -126,7 +62,21 @@ const TankGuide = () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
       console.log('Tank data : ', data)
+
       setTanks(data)
+      setTankCode(data[0].code)
+    } catch (err) {
+      console.error(`Fetch Tank Data Error : ${err}`)
+    }
+  }
+
+  const fetchTankGuideCal = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`)
+      console.log('payload :,', data.data)
+      console.log('Tank Cal : ', data)
+      setAllTankCal(data.data)
+      setTankCode(data.data[0].tank_code)
     } catch (err) {
       console.error(`Fetch Tank Data Error : ${err}`)
     }
@@ -134,34 +84,47 @@ const TankGuide = () => {
 
   useEffect(() => {
     fetchTankData()
+    fetchTankGuideCal()
   }, [])
 
   useEffect(() => {
-    if (tanks.length > 0 && !tankCode) {
-      setTankCode(tanks[0].code)
-    }
-  }, [tanks])
+    allTankCal.forEach((item) => {
+      if (item.tank_code === tankCode) {
+        setTankCal(item.data)
+      }
+    })
+    tanks.forEach((item) => {
+      if (item.code === tankCode) {
+        if (item.auto_status === 0) {
+          // setAutoMode(false)
+          setAutoIsOn(false)
+          console.log(`tank ${item.code} : auto ${item.auto_status}`)
+        } else {
+          // setAutoMode(true)
+          setAutoIsOn(true)
+          console.log(`tank ${item.code} : auto ${item.auto_status}`)
+        }
+      }
+    })
+  }, [tankCode])
+
+  // useEffect(() => {
+  //   if (tanks.length > 0 && !tankCode) {
+  //     setTankCode(tanks[0].code)
+  //   }
+  // }, [tanks])
 
   useEffect(() => {
-    if (tanks.length > 0 && tankCode) {
-      checkTankCode()
+    const filter_data = []
+    for (let i = 0; i < tankCal.length; i += heightStep) {
+      filter_data.push(tankCal[i])
     }
-    let points = []
-    for (let i = 0; i < manualTable.length; i += heightStep) {
-      const h = manualTable[i]?.height
-      const volL = manualTable[i]?.volume
-      if (h != null && volL != null) {
-        points.push({
-          height: Number(h),
-          volume: Number(volL).toFixed(2),
-        })
-      }
-    }
-    setTankAdjustTable(points)
-  }, [tankCode, tanks, heightStep])
+    setTankCalFilter(filter_data)
+    // console.log('Tank Filter:', tankCalFilter)
+  }, [heightStep, tankCal])
 
   const handleExportExcel = async () => {
-    if (!defaultTable || defaultTable.length === 0) {
+    if (!tankCalFilter || tankCalFilter.length === 0) {
       Swal.fire({
         position: 'top-end',
         icon: 'error',
@@ -206,7 +169,7 @@ const TankGuide = () => {
     })
 
     //ใส่ข้อมูล
-    defaultTable.forEach((row) => {
+    tankCalFilter.forEach((row) => {
       const dataRow = worksheet.addRow([row.height, row.volume])
       dataRow.eachCell((cell) => {
         cell.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -294,6 +257,17 @@ const TankGuide = () => {
     fileInputRef.current.click()
   }
 
+  const handleAuto = async () => {
+    // Auto ON
+    if (autoIsOn === true) {
+      console.log('handle Auto:', autoIsOn)
+      setAutoIsOn(false)
+    } else {
+      console.log('handle Auto:', autoIsOn)
+      setAutoIsOn(true)
+    }
+  }
+
   const handleTrainModel = async () => {
     if (manualTable.length === 0) {
       Swal.fire('Error', 'Please import calibration data first!', 'error')
@@ -304,10 +278,6 @@ const TankGuide = () => {
       const payload = {
         real_data: manualTable,
         tank_code: tankCode,
-        horizontal: Number(parseFloat(horizontal).toFixed(2)),
-        vertical: Number(parseFloat(vertical).toFixed(2)),
-        tank_length: Number(parseFloat(tankLength).toFixed(2)),
-        tank_type: Number(tankType),
       }
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/tank/train`, payload)
 
@@ -481,13 +451,14 @@ const TankGuide = () => {
               </CFormLabel>
               <CFormSwitch
                 id="autoMode"
-                checked={isOn}
-                onChange={() => {
-                  setIsOn(!isOn)
-                  console.log('is on:', isOn)
+                checked={autoIsOn}
+                onClick={() => {
+                  // setAutoIsOn(!autoIsOn)
+                  handleAuto()
+                  console.log('Auto Click')
                 }}
                 style={{
-                  backgroundColor: isOn ? 'limegreen' : '#a9a9a9',
+                  backgroundColor: autoIsOn ? 'limegreen' : '#a9a9a9',
                   cursor: 'pointer',
                   borderColor: '#fff',
                   borderWidth: '3px',
@@ -513,7 +484,7 @@ const TankGuide = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CSmartTable
-                    items={defaultTable}
+                    items={tankCalFilter}
                     columns={[
                       // { key: 'step', label: 'Step', _style: { width: '20px' } },
                       { key: 'height', label: 'Height (mm)', _style: { width: '50%' } },
@@ -539,8 +510,8 @@ const TankGuide = () => {
 
                   <div className="d-flex gap-2">
                     <CButton
-                      disabled={isOn}
-                      color={isOn ? 'secondary' : 'success'}
+                      disabled={autoIsOn}
+                      color={autoIsOn ? 'secondary' : 'success'}
                       size="sm"
                       variant="outline"
                       onClick={handleClickImport}

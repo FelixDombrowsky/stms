@@ -61,12 +61,15 @@ const AddProbeModal = ({
       } else {
         console.log(probes.length)
         console.log(parseInt(form.probe_id))
-        console.log(probes[0].probe_id)
-        for (let i = 0; i < probes.length; i++) {
-          if (parseInt(form.probe_id) === probes[i].probe_id) {
-            alert('Probe ID already use')
-            console.log('Probe ID already use')
-            return
+        // console.log(probes[0].probe_id)
+        console.log('Probe Length:', probes.length)
+        if (probes.length > 0) {
+          for (let i = 0; i < probes.length; i++) {
+            if (parseInt(form.probe_id) === probes[i].probe_id) {
+              alert('Probe ID already use')
+              console.log('Probe ID already use')
+              return
+            }
           }
         }
 
