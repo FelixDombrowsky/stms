@@ -86,3 +86,19 @@ input::placeholder,
 textarea::placeholder {
   color: #a9a9a9 !important;
 }
+
+.btn-confirm-custom {
+  background-color: #1b9e3e;
+  color: white;
+
+  padding: 8px 20px;
+  border-radius: 5px;
+}
+
+.btn-cancel-custom {
+  background-color: #e55353;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 5px;
+  margin-right: 10px; /* ✅ ใช้งานได้จริง */
+}

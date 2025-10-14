@@ -7,6 +7,7 @@ import {
   updateTankSettings,
   trainTankGuide,
   getTankCalculation,
+  updateAutoStatus,
 } from "../controllers/tankControl.js"
 
 const router = express.Router()
@@ -20,5 +21,6 @@ router.delete("/setting/:code", deleteTankSettings)
 // Tank Guide Chart
 router.get("/guide/cal", getTankCalculation)
 router.post("/train", trainTankGuide)
+router.put("/guide/auto/:code", updateAutoStatus)
 
 export default router

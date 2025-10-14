@@ -63,6 +63,7 @@
     "react-router-dom": "^7.1.5",
     "redux": "5.0.1",
     "simplebar-react": "^3.3.0",
+    "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.24.0",
     "xlsx": "^0.18.5"
   },

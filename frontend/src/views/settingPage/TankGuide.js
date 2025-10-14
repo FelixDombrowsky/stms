@@ -39,7 +39,7 @@ const TankGuide = () => {
   const [model, setModel] = useState(1)
 
   const [autoIsOn, setAutoIsOn] = useState(false)
-  const [autoMode, setAutoMode] = useState(false)
+  // const [autoMode, setAutoMode] = useState(false)
 
   const [manualTable, setManualTable] = useState([])
   const [tankAdjustTable, setTankAdjustTable] = useState([])
@@ -64,7 +64,9 @@ const TankGuide = () => {
       console.log('Tank data : ', data)
 
       setTanks(data)
-      setTankCode(data[0].code)
+      if (!tankCode) {
+        setTankCode(data[0].code)
+      }
     } catch (err) {
       console.error(`Fetch Tank Data Error : ${err}`)
     }
@@ -93,6 +95,7 @@ const TankGuide = () => {
         setTankCal(item.data)
       }
     })
+    fetchTankData()
     tanks.forEach((item) => {
       if (item.code === tankCode) {
         if (item.auto_status === 0) {
@@ -257,16 +260,91 @@ const TankGuide = () => {
     fileInputRef.current.click()
   }
 
-  const handleAuto = async () => {
-    // Auto ON
+  const handleAuto = () => {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn-confirm-custom',
+        cancelButton: 'btn-cancel-custom',
+      },
+      buttonsStyling: false,
+    })
+
+    //  ผู้ใช้จะ "ปิด" Auto
     if (autoIsOn === true) {
-      console.log('handle Auto:', autoIsOn)
-      setAutoIsOn(false)
+      swalWithBootstrapButtons
+        .fire({
+          title: 'Turn OFF Auto Calibration?',
+          text: 'Are you sure you want to disable Auto Calibration?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, turn OFF',
+          cancelButtonText: 'No, keep it ON',
+          reverseButtons: true,
+          // color: 'warning',
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            const payload = { auto_status: 0 }
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/tank/guide/auto/${tankCode}`, payload)
+            setAutoIsOn(false)
+            // fetchTankData()
+            // setTankCode(data[0].data.code)
+            swalWithBootstrapButtons.fire({
+              title: 'Auto Calibration is now OFF',
+              // text: 'Your file has been deleted.',
+              icon: 'success',
+            })
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            swalWithBootstrapButtons.fire({
+              title: 'Cancelled',
+              text: 'Auto Calibration is still ON.',
+              icon: 'info',
+            })
+          }
+        })
     } else {
-      console.log('handle Auto:', autoIsOn)
-      setAutoIsOn(true)
+      //  ผู้ใช้จะ "เปิด" Auto
+      swalWithBootstrapButtons
+        .fire({
+          title: 'Turn ON Auto Calibration?',
+          text: 'System will start automatic calibration.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, turn ON',
+          cancelButtonText: 'No, keep it OFF',
+          reverseButtons: true,
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            const payload = { auto_status: 1 }
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/tank/guide/auto/${tankCode}`, payload)
+            setAutoIsOn(true)
+            // fetchTankData()
+            // setTankCode(data[0].data.code)
+            swalWithBootstrapButtons.fire({
+              title: 'Auto Calibration is now ON',
+              // text: 'Your file has been deleted.',
+              icon: 'success',
+            })
+          } else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalWithBootstrapButtons.fire({
+              title: 'Cancelled',
+              text: 'Auto Calibration is still OFF.',
+              icon: 'info',
+            })
+          }
+        })
     }
   }
+
+  const handleUpdateAuto = async () => {}
+
+  // useEffect(() => {
+  //   console.log('useEffect AutoisOn:', autoIsOn)
+  // }, [autoIsOn])
 
   const handleTrainModel = async () => {
     if (manualTable.length === 0) {
@@ -452,8 +530,12 @@ const TankGuide = () => {
               <CFormSwitch
                 id="autoMode"
                 checked={autoIsOn}
-                onClick={() => {
-                  // setAutoIsOn(!autoIsOn)
+                // onClick={() => {
+                //   // setAutoIsOn(!autoIsOn)
+                //   handleAuto()
+                //   console.log('Auto Click')
+                // }}
+                onChange={() => {
                   handleAuto()
                   console.log('Auto Click')
                 }}

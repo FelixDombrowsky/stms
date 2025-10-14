@@ -40,13 +40,13 @@ const _nav = [
   {
     component: CNavItem,
     name: <Translation>{(t) => t('Fuel Loading')}</Translation>,
-    to: '/theme/colors',
+    to: '/function/fuelLoad',
     icon: <CIcon icon={cilColorFill} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: <Translation>{(t) => t('Leak Test')}</Translation>,
-    to: '/theme/typography',
+    to: '/function/leakTest',
     icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
   },
   {

@@ -480,12 +480,26 @@ export const trainTankGuide = async (req, res) => {
 
 export const updateAutoStatus = async (req, res) => {
   try {
-    const { tank_code, auto_status } = req.body
+    const { code } = req.params
+    const { auto_status } = req.body
+
+    if (!code || auto_status === undefined) {
+      return res
+        .status(400)
+        .json({ error: "tank_code and auto_status are required" })
+    }
     const updated = await prisma.tank_setting.update({
-      where: { code: tank_code },
-      data: { auto_status: auto_status },
+      where: { code: code },
+      data: { auto_status: Number(auto_status) },
     })
+    res.status(200).json({ message: "Auto status updated", data: updated })
   } catch (err) {
-    console.error()
+    if (err.code === "P2025") {
+      return res
+        .status(404)
+        .json({ error: "No Code Found", details: err.message })
+    }
+    console.error("❌ Set Auto Error :", err)
+    res.status(500).json({ error: "Set Auto Error", details: err.message })
   }
 }

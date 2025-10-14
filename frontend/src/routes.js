@@ -6,6 +6,10 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
+// Function
+const FuelLoad = React.lazy(() => import('./views/functionPage/FuelLoad'))
+const LeakTest = React.lazy(() => import('./views/functionPage/LeakTest'))
+
 // Settings
 const ProbeSetting = React.lazy(() => import('./views/settingPage/ProbeSetting'))
 const ProbeConfig = React.lazy(() => import('./views/settingPage/ProbeConfig'))
@@ -215,7 +219,8 @@ const routes = [
   { path: '/tank/setting', name: 'TankSetting', element: TankSetting, exact: true },
   { path: '/tank/guide', name: 'TankGuide', element: TankGuide, exact: true },
 
-  {},
+  { path: '/function/fuelLoad', name: 'FuelLoad', element: FuelLoad, exact: true },
+  { path: '/function/leakTest', name: 'LeakTest', element: LeakTest, exact: true },
 ]
 
 export default routes
