@@ -2,6 +2,7 @@
 // import pool from "../db.js";
 import prisma from "../db.js"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
+import { refreshTankCache } from "../services/configCache.js"
 
 // Tank Setting
 export const getTankSettings = async (req, res) => {
@@ -24,6 +25,7 @@ export const getTankSettings = async (req, res) => {
     //      JOIN fuel_names s ON p.fuel_code = s.fuel_code
     //      ORDER BY p.code ASC
     //   `)
+    // await refreshTankCache() // <-- รีเฟรช cache
     res.status(200).send(tankSettings)
   } catch (err) {
     console.error(err)
@@ -104,7 +106,7 @@ export const addTankSettings = async (req, res) => {
     //     Number(water_alarm),
     //   ]
     // );
-
+    await refreshTankCache() // <-- รีเฟรช cache
     res
       .status(201)
       .json({ message: "Tank created successfully", data: newTank })
@@ -207,7 +209,7 @@ export const updateTankSettings = async (req, res) => {
     //     Number(water_alarm),
     //   ]
     // );
-
+    await refreshTankCache() // <-- รีเฟรช cache
     //success
     return res
       .status(200)
@@ -242,7 +244,7 @@ export const deleteTankSettings = async (req, res) => {
     // `,
     //   [code.trim()]
     // );
-
+    await refreshTankCache() // <-- รีเฟรช cache
     return res.status(200).json({
       message: `Tank with code ${code} deleted successfully.`,
       data: deleted,

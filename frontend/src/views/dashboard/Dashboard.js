@@ -1,43 +1,48 @@
 import React, { useEffect, useState } from 'react'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react-pro'
-import { Liquid } from '@ant-design/plots'
-import { Droplet, Fuel, Thermometer } from 'lucide-react'
 import TankCard from './TankCard'
 import { useSocket } from '../../context/SocketContext'
 
 const Dashboard = () => {
   const socket = useSocket()
-  const [fuelVolume, setFuelVolume] = useState(0)
-  // const [fuelPercent, setFuelPercent] = useState('')
   const [theme, setTheme] = useState(document.documentElement.getAttribute('data-coreui-theme') || 'light')
-  const [tanks, setTanks] = useState([
-    {
-      waterColor: '#4f4f4f',
-      volume: 0,
-      capacity: 30000.0,
-      fuelType: 'Diesel',
-      fuelHeight: 120.0,
-      name: 'Tank1',
-    },
-  ])
+  const [tanks, setTanks] = useState([])
 
   useEffect(() => {
+    if (!socket) return
+
     socket.on('tank_update', (data) => {
-      console.log('Received:', data)
-      console.log(' FuelVolume:', data.fuel_volume)
-      // setFuelVolume(data.fuel_volume)
-      // setFuelPercent(data.fuel_percent)
-      setTanks((prevTanks) =>
-        prevTanks.map((tank) =>
-          tank.name === 'Tank1'
-            ? {
-                ...tank,
-                volume: parseFloat(data.fuel_volume).toFixed(2), // ✅ อัปเดตจุดนี้
-                // ถ้ามี
-              }
-            : tank,
-        ),
-      )
+      console.log('✅ Received update:', data)
+
+      setTanks((prevTanks) => {
+        const map = new Map()
+
+        //1) เก่าใส่ Map
+        prevTanks.forEach((t) => {
+          map.set(t.tank_code, t)
+        })
+
+        //2) ใหม่ replace หรือ เพิ่ม
+        data.forEach((newTank) => {
+          map.set(newTank.tank_code, { ...map.get(newTank.tank_code), ...newTank })
+          console.log('newTank:', newTank.fuel_percent)
+        })
+
+        // 3) คืนค่า array ใหม่
+        return Array.from(map.values())
+      })
+
+      // setTanks((prevTanks) =>
+      //   prevTanks.map((tank) =>
+      //     tank.name === 'Tank1'
+      //       ? {
+      //           ...tank,
+      //           fuelHeight: Number(data.oil_h), // ✅ อัปเดตจุดนี้
+      //           // ถ้ามี
+      //         }
+      //       : tank,
+      //   ),
+      // )
     })
 
     return () => {
@@ -119,12 +124,11 @@ const Dashboard = () => {
       <CCardBody>
         <CRow>
           {tanks.map((tank) => (
-            <CCol xs={12} md={6} lg={6} xl={4} key={tank.id}>
+            <CCol xs={12} md={6} lg={6} xl={4} key={tank.tank_code}>
               <TankCard tank={tank} theme={theme} />
             </CCol>
           ))}
         </CRow>
-        <p>{fuelVolume}</p>
       </CCardBody>
     </>
   )

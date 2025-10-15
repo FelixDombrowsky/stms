@@ -4,24 +4,18 @@ import { CCard } from '@coreui/react-pro'
 import { Droplet, Fuel } from 'lucide-react'
 import { Liquid } from '@ant-design/plots'
 
-const DemoLiquid = React.memo(({ theme, waterColor, volume, capacity }) => {
-  let perc = +(volume / capacity).toFixed(2)
-  console.log('percent_old:', perc)
-  console.log('percent_new:', volume / capacity)
-
+const DemoLiquid = React.memo(({ theme, color, percent }) => {
   const config = {
-    percent: volume / capacity,
-    //  percent: perc,
+    percent: percent,
     width: 150,
     height: 150,
-
     style: {
       outlineBorder: 4,
       outlineDistance: 2,
       waveLength: 100,
       textFill: theme === 'dark' ? '#ffffff' : '#000000',
-      fill: waterColor,
-      stroke: waterColor,
+      fill: color,
+      stroke: color,
     },
   }
 
@@ -29,29 +23,40 @@ const DemoLiquid = React.memo(({ theme, waterColor, volume, capacity }) => {
 })
 
 const TankCard = React.memo(({ tank, theme }) => {
-  console.log({ tank, theme })
+  // คำนวณ % (เผื่อ Backend ยังไม่ส่ง percent มา)
+  // const percent = tank.capacity_l > 0 ? tank.oil_volume / tank.capacity_l : 0
 
+  // สีของ status
+  const statusColor =
+    tank.status === 'normal'
+      ? 'limegreen'
+      : tank.status === 'high_alert'
+        ? 'orange'
+        : tank.status === 'high_alarm'
+          ? 'red'
+          : 'gray'
   return (
     <CCard className="p-3 d-flex flex-row align-items-center mb-3" style={{ width: '400px', height: '220px' }}>
       {/* ซ้าย: วงกลมกราฟน้ำมัน */}
       <div className="text-center p-2 d-flex flex-column align-items-center" style={{ flex: 1 }}>
-        <DemoLiquid theme={theme} waterColor={tank.fuelColor} volume={tank.volume} capacity={tank.capacity} />
+        <DemoLiquid theme={theme} color={tank.fuel_color || '#5a5a5a'} percent={tank.fuel_percent} />
+
         <div className="mt-2">
-          <h6 className="mb-1">{tank.fuelType}</h6>
+          <h6 className="mb-1">{tank.fuel_name}</h6>
         </div>
       </div>
 
       {/* ขวา: ข้อมูล tank */}
       <div style={{ flex: 2 }} className="d-flex flex-column justify-content-between h-100 ps-2">
         <div className="d-flex align-items-center justify-content-between">
-          <strong className="ml-1">{tank.name}</strong>
+          <strong className="ml-1">{tank.tank_name}</strong>
           <span
             style={{
               display: 'inline-block',
               width: 12,
               height: 12,
               borderRadius: '50%',
-              backgroundColor: tank.status === 'online' ? 'limegreen' : 'red',
+              backgroundColor: statusColor,
             }}
           ></span>
         </div>
@@ -63,14 +68,14 @@ const TankCard = React.memo(({ tank, theme }) => {
               <span>Fuel</span>
             </div>
             <div>
-              <span style={{ fontSize: '0.85rem' }}>{tank.temperature} °C</span>
+              <span style={{ fontSize: '0.85rem' }}>{tank.temp} °C</span>
             </div>
           </div>
 
           <div className="mt-2 mb-2">
-            <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{tank.volume.toLocaleString()} L</span>
+            <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{tank.oil_volume.toLocaleString()} L</span>
             <span style={{ marginLeft: '6px', fontSize: '0.9rem', color: theme === 'dark' ? '#e4e4e4' : '#666' }}>
-              / {tank.capacity.toLocaleString()} L
+              / {tank.capacity_l.toLocaleString()} L
             </span>
 
             <div className="progress mt-2" style={{ height: '6px' }}>
@@ -78,16 +83,16 @@ const TankCard = React.memo(({ tank, theme }) => {
                 className="progress-bar"
                 role="progressbar"
                 style={{
-                  width: `${(tank.volume / tank.capacity) * 100}%`,
-                  backgroundColor: tank.fuelColor,
+                  width: `${tank.fuel_percent * 100}%`,
+                  backgroundColor: tank.fuel_color || '#5a5a5a',
                 }}
               ></div>
             </div>
           </div>
 
           <div className="d-flex justify-content-between align-items-center">
-            <div style={{ fontSize: '0.85rem' }}>Ulg: {(tank.capacity - tank.volume).toLocaleString()} L</div>
-            <div style={{ fontSize: '0.85rem' }}>{tank.fuelHeight.toLocaleString()} mm</div>
+            <div style={{ fontSize: '0.85rem' }}>Ulg: {(tank.capacity_l - tank.oil_volume).toLocaleString()} L</div>
+            <div style={{ fontSize: '0.85rem' }}>{tank.oil_height} mm</div>
           </div>
         </div>
 
@@ -98,9 +103,9 @@ const TankCard = React.memo(({ tank, theme }) => {
           </div>
 
           <div>
-            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{tank.water} L</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{tank.water_volume} L</span>
             <span style={{ marginLeft: '6px', fontSize: '0.85rem', color: theme === 'dark' ? '#e4e4e4' : '#666' }}>
-              {tank.waterHeight} mm
+              {tank.water_height} mm
             </span>
           </div>
         </div>
