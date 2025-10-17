@@ -24,6 +24,8 @@ export const readRegistersSafe = async (
 
   while (offset < start + length) {
     const chunkSize = Math.min(maxLen, start + length - offset)
+    // console.log("start :", start)
+    // console.log("chunckSize:", chunkSize)
     let res
 
     if (funcCode === "03") {

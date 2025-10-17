@@ -4,37 +4,60 @@ import prisma from "../db.js"
 import ModbusRTU from "modbus-serial"
 import dotenv from "dotenv"
 import { refreshTankCache } from "../services/configCache.js"
+import { getClient, connectPort } from "../modbus/modbusClient.js"
+import {
+  pausePolling,
+  resumePolling,
+  waitPollingIdle,
+} from "../websocket/wsServer.js"
 
 dotenv.config()
 
-const serialPort =
-  process.platform === "win32"
-    ? process.env.MODBUS_PORT
-    : process.env.MODBUS_PORT_LINUX
+let isBusy = false
 
-const baudRate = Number(process.env.MODBUS_BAUD)
+// const serialPort =
+//   process.platform === "win32"
+//     ? process.env.MODBUS_PORT
+//     : process.env.MODBUS_PORT_LINUX
+
+// const baudRate = Number(process.env.MODBUS_BAUD)
 
 // Probe Config
 export const writeProbeConfig = async (req, res) => {
+  if (isBusy) return res.status(409).json({ message: "System Busy" })
+  isBusy = true
+
   const { probe_id, register_address, write_value } = req.body
   console.log(
     `probe_id: ${probe_id},address: ${register_address}, value: ${write_value}`
   )
-  const client = new ModbusRTU()
+  // const client = new ModbusRTU()
 
   try {
-    await client.connectRTUBuffered(serialPort, { baudRate })
+    // 1) หยุด polling แล้วรอให้ idle
+    pausePolling()
+    await waitPollingIdle()
+
+    // 2) ให้แน่ใจว่า Port พร้อมและใช้ client เดิม
+    await connectPort()
+    const client = getClient()
     client.setID(Number(probe_id))
-    // client.setID(0)
     client.setTimeout(1000)
 
-    console.log("Connected to Modbus RTU")
+    console.log("Connected (shared Modbus client)")
     try {
       const writeResult = await client.writeRegister(
         Number(register_address),
         Number(write_value)
       )
       console.log("Write response:", writeResult)
+      // อัปเดต cache ให้ polling เห็น config ใหม่ทันที (ถ้ามีผล)
+      try {
+        await refreshTankCache()
+      } catch (e) {
+        console.warn("refreshTankCache warn", e?.message)
+      }
+
       res.json({ message: "Write success", result: writeResult })
     } catch (err) {
       console.error("Write Probe Error :", err.message)
@@ -46,16 +69,15 @@ export const writeProbeConfig = async (req, res) => {
       .status(500)
       .json({ message: "Com Connection Error", error: err.message })
   } finally {
-    try {
-      await client.close()
-      console.log("Port Closed Successfully")
-    } catch (err) {
-      console.error("Port Closed Unsuccess:", err.message)
-    }
+    resumePolling() // ให้ polling ต่อได้
+    isBusy = false
   }
 }
 
 export const readProbeConfig = async (req, res) => {
+  if (isBusy) return res.status(409).json({ message: "System busy" })
+  isBusy = true
+
   console.log("read prober config")
   const {
     probe_id,
@@ -66,8 +88,6 @@ export const readProbeConfig = async (req, res) => {
     format,
     scale = 1,
   } = req.body
-
-  const client = new ModbusRTU()
 
   // จัด byte order → float
   function parseFloatFromWords(words, format) {
@@ -114,6 +134,7 @@ export const readProbeConfig = async (req, res) => {
     while (remaining > 0) {
       const chunk = Math.min(remaining, maxPerRead)
       let result
+      // console.log("function :", func)
       if (func === "03") {
         result = await client.readHoldingRegisters(addr, chunk)
       } else {
@@ -127,56 +148,68 @@ export const readProbeConfig = async (req, res) => {
   }
 
   try {
-    await client.connectRTUBuffered(serialPort, { baudRate })
+    // 1) หยุด polling แล้วรอ idle
+    pausePolling()
+    await waitPollingIdle()
+
+    // 2) ใช้ client กลาง
+    const client = getClient()
     client.setID(Number(probe_id))
     client.setTimeout(1000)
 
-    console.log("✅ Connected to Modbus RTU")
+    console.log("✅ Connected (shared Modbus client)")
 
     try {
-      const totalLength = address_start + row_count * address_length
-      console.log(
-        `request: start=${address_start}, rows=${row_count}, totalLength=${totalLength}`
-      )
+      // const totalLength = address_start + row_count * address_length
+      const readLength = row_count * address_length
+      // console.log(
+      //   `request: start=${address_start}, rows=${row_count}, totalLength=${totalLength}`
+      // )
 
       // 👉 อ่านตั้งแต่ address 0 เสมอ
       const raw = await safeReadRegisters(
         client,
         function_code,
-        0,
-        totalLength,
+        // 0,
+        address_start,
+        // totalLength,
+        readLength,
         20
       )
-      console.log("raw:", raw)
+      // console.log("raw:", raw)
 
       const rows = []
       for (let i = 0; i < row_count; i++) {
         if (address_length === 2) {
-          const wordOffset = address_start + i * 2
+          // const wordOffset = address_start + i * 2
+          const wordOffset = i * 2
           const words = raw.slice(wordOffset, wordOffset + 2)
           const floatVal = parseFloatFromWords(words, format) * scale
 
           rows.push({
-            address: wordOffset,
+            address: address_start + i * 2,
             value: floatVal,
             length: address_length,
           })
         } else {
-          const wordOffset = address_start + i
+          // const wordOffset = address_start + i
+          const wordOffset = i
           const rawVal = raw[wordOffset] * scale
 
           rows.push({
-            address: wordOffset,
+            // address: wordOffset,
+            address: address_start + i,
             value: rawVal,
             length: address_length,
           })
         }
       }
 
-      console.log("rows:", rows)
+      // console.log("rows:", rows)
       res.json({ message: "Read success", rows })
     } catch (err) {
       console.error("🚨 Read Error:", err.message)
+      // console.log("error", err.message)
       res.status(500).json({ message: "Read Error", error: err.message })
     }
   } catch (err) {
@@ -185,12 +218,8 @@ export const readProbeConfig = async (req, res) => {
       .status(500)
       .json({ message: "Com Connection Error", error: err.message })
   } finally {
-    try {
-      await client.close()
-      console.log("🔌 Port Closed Successfully")
-    } catch (err) {
-      console.error("⚠️ Port Closed Unsuccess:", err.message)
-    }
+    resumePolling()
+    isBusy = false
   }
 }
 

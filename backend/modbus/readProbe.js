@@ -1,33 +1,38 @@
-// รับ probe_id →
-// ดึง config address/scale/format/function_code จาก tankCache
-//  ตั้ง client.setID(probe_id)
-//  คำนวณว่าจะอ่านกี่ register (max address + address_length)
-//  ใช้ readRegistersSafe(...) อ่าน raw registers
-//  ใช้ parseValue(...) แปลง oil, water, temp
-
-import { isConnected, getClient } from "./modbusClient.js"
+import { isConnected, getClient, handleModbusError } from "./modbusClient.js"
 import { readRegistersSafe } from "./readRegistersSafe.js"
 import { parseValue } from "./parseValue.js"
 import { tankCache } from "../services/configCache.js"
 
-/**
- * อ่านค่าจาก 1 probe_id
+/** 
  * @param {number} probe_id
- * @returns {object|null} { probe_id, oil_h, water_h, temp, timestamp }
+ * @returns {object} { probe_id, oil_h, water_h, temp, status, timestamp }
  */
-
 export const readProbe = async (probe_id) => {
-  // 1) ตรวจว่า Modbus ต่ออยู่ไหม
+  const timestamp = new Date().toISOString()
+
+  // 1) ถ้า Modbus ไม่เชื่อมต่อ
   if (!isConnected()) {
-    console.warn(`⚠ readProbe: Modbus not connected`)
-    return null
+    return {
+      probe_id,
+      oil_h: null,
+      water_h: null,
+      temp: null,
+      status: "no_port",
+      timestamp,
+    }
   }
 
-  // 2) ดึง config จาก tankCache
+  // 2) ดึง config จาก cache
   const config = tankCache.get(probe_id)
   if (!config) {
-    console.warn(`⚠ readProbe: No config for probe_id=${probe_id}`)
-    return null
+    return {
+      probe_id,
+      oil_h: null,
+      water_h: null,
+      temp: null,
+      status: "no_config",
+      timestamp,
+    }
   }
 
   try {
@@ -43,68 +48,114 @@ export const readProbe = async (probe_id) => {
       format,
     } = config
 
-    // 3) ตั้ง slave ID
     const client = getClient()
-    client.setID(probe_id)
+    client.setID(Number(probe_id))
 
-    // 4) คำนวณว่าต้องอ่าน ถึง address ไหน
-    //    สมมติ address สูงสุด = temp_address = 10 และ address_length = 2
-    //    => ต้องอ่านถึง 10+2=12 register (0,1,...,11)
-    const maxAddr = Math.max(
-      oil_h_address ?? -1,
-      water_h_address ?? -1,
-      temp_address ?? -1
+    // รวม address ทั้งหมดที่ใช้งาน (อาจมี null)
+    const addresses = [oil_h_address, water_h_address, temp_address].filter(
+      (addr) => addr !== null && addr !== undefined && addr >= 0
     )
-    const totalLen = (maxAddr >= 0 ? maxAddr : 0) + (address_length || 1)
 
-    if (totalLen <= 0) {
-      // ไม่มีค่าอะไรให้อ่าน
+    // ถ้าไม่มี address ใดเลย → no_address
+    if (addresses.length === 0) {
       return {
         probe_id,
         oil_h: null,
         water_h: null,
         temp: null,
-        timestamp: new Date().toISOString(),
+        status: "no_address",
+        timestamp,
       }
     }
 
-    // 5) อ่าน register แบบ chunk ปลอดภัย
-    const raw = await readRegistersSafe(function_code, 0, totalLen, 20)
-    // จะได้ raw = [val0, val1, val2, ...]
+    // ✅ หา start = address ที่น้อยที่สุด
+    const startAddr = Math.min(...addresses)
 
-    // 6) แปลงค่าแต่ละตัว
-    const oil_h = parseValue(
-      raw,
-      oil_h_address,
-      address_length,
-      oil_h_scale,
-      format
-    )
-    const water_h = parseValue(
-      raw,
-      water_h_address,
-      address_length,
-      water_h_scale,
-      format
-    )
-    const temp = parseValue(
-      raw,
-      temp_address,
-      address_length,
-      temp_scale,
-      format
+    // ✅ หา end = address สูงสุด + address_length
+    //    เช่น temp_address = 104, address_length = 2 → ต้องอ่านถึง 106
+    const maxAddr = Math.max(...addresses)
+    const readLength = maxAddr + (address_length || 1) - startAddr
+
+    // เพื่อความปลอดภัย
+    if (readLength <= 0) {
+      return {
+        probe_id,
+        oil_h: null,
+        water_h: null,
+        temp: null,
+        status: "no_address",
+        timestamp,
+      }
+    }
+
+    // ✅ อ่าน register เฉพาะช่วงที่ต้องใช้
+    const raw = await readRegistersSafe(
+      function_code,
+      startAddr,
+      readLength,
+      20 // chunk size
     )
 
-    // 7) คือค่ารูปแบบที่ websocket จะใช้
+    // Helper: แปลง address จริง → index ใน raw
+    const getOffsetValue = (addr, scale, type) => {
+      if (addr === null || addr === undefined || addr < 0) return null
+      const offset = addr - startAddr
+      return parseValue(raw, offset, address_length, scale, format, type)
+    }
+
+    // ✅ ดึงค่าแต่ละตัว (ถ้า address = null → ได้ null ตามเงื่อนไขของคุณ)
+    const oil_h = getOffsetValue(oil_h_address, oil_h_scale)
+    const water_h = getOffsetValue(water_h_address, water_h_scale)
+    const temp = getOffsetValue(temp_address, temp_scale)
+
+    // ✅ Status normal เสมอ (แม้บางตัวจะไม่มี address) เพราะคุณเลือก "ข้าม"
     return {
       probe_id,
       oil_h,
       water_h,
       temp,
-      timestamp: new Date().toISOString(),
+      status: "normal",
+      timestamp,
     }
   } catch (err) {
-    console.error(`❌ Error reading probe ${probe_id}:`, err.message)
-    return null
+    console.error(`❌ readProbe(${probe_id}) error:`, err.message)
+
+    // ✅ Timeout = เจอ Probe ไม่ได้
+    if (err.message.includes("Timed out")) {
+      return {
+        probe_id,
+        oil_h: null,
+        water_h: null,
+        temp: null,
+        status: "no_probe",
+        timestamp,
+      }
+    }
+
+    // ✅ Port หลุด ตอนอ่าน
+    if (
+      err.message.includes("Port Not Open") ||
+      err.message.includes("Error: write E")
+    ) {
+      handleModbusError(err)
+      return {
+        probe_id,
+        oil_h: null,
+        water_h: null,
+        temp: null,
+        status: "no_port",
+        timestamp,
+      }
+    }
+
+    // ✅ Error อื่น ๆ
+    return {
+      probe_id,
+      oil_h: null,
+      water_h: null,
+      temp: null,
+      status: "error",
+      timestamp,
+    }
   }
 }

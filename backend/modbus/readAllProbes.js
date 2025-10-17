@@ -1,25 +1,40 @@
+// readAllProbes.js
 import { tankCache } from "../services/configCache.js"
 import { readProbe } from "./readProbe.js"
 
-// อ่านค่าจาก probe ทุกตัว
-// @returns {Promise<Array>} array ของผลลัพธ์แต่ละ probe
-
+/**
+ * อ่านค่าจาก probe ทุกตัวในระบบ
+ * @returns {Promise<Array>} [{ probe_id, oil_h, water_h, temp, status, timestamp }, ...]
+ */
 export const readAllProbes = async () => {
   const results = []
 
-  // ดึง probe_id ทั้งหมดจาก tankCache
+  // 1) ดึง probe_id ทั้งหมดจาก tankCache
   const probeIds = Array.from(tankCache.keys())
 
   if (probeIds.length === 0) {
-    // ถ้าไม่มี probe -> คืน array ว่าง
+    // ไม่มี probe เลย
     return results
   }
 
-  // วนทีละตัว
+  // 2) อ่านทีละตัว (await เพื่อแยกอาการผิดพลาดแต่ละตัว)
   for (const id of probeIds) {
-    const data = await readProbe(id)
-    if (data) {
+    try {
+      const data = await readProbe(id)
+      await new Promise((r) => setTimeout(r, 50)) // พัก 50 ms
+      // console.log("wait 50 ms")
       results.push(data)
+    } catch (err) {
+      //กันเหนียว เผื่อเกิด exception แบบที่ไม่ได้จับใน readProbe()
+      console.error(`❌ Unexpected error at probe ${id}:`, err.message)
+      results.push({
+        probe_id: id,
+        oil_h: null,
+        water_h: null,
+        temp: null,
+        status: "error",
+        timestamp: new Date().toISOString(),
+      })
     }
   }
 

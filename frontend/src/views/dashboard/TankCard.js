@@ -25,7 +25,7 @@ const DemoLiquid = React.memo(({ theme, color, percent }) => {
 const TankCard = React.memo(({ tank, theme }) => {
   // คำนวณ % (เผื่อ Backend ยังไม่ส่ง percent มา)
   // const percent = tank.capacity_l > 0 ? tank.oil_volume / tank.capacity_l : 0
-
+  console.log('tank_status : ', tank.status)
   // สีของ status
   const statusColor =
     tank.status === 'normal'
@@ -34,9 +34,27 @@ const TankCard = React.memo(({ tank, theme }) => {
         ? 'orange'
         : tank.status === 'high_alarm'
           ? 'red'
-          : 'gray'
+          : tank.status === 'low_alarm'
+            ? 'red'
+            : 'gray'
+
   return (
-    <CCard className="p-3 d-flex flex-row align-items-center mb-3" style={{ width: '400px', height: '220px' }}>
+    <CCard
+      className="p-3 d-flex flex-row align-items-center mb-1 m-1"
+      style={{
+        // width: '450px',
+        // height: '220px',
+        maxWidth: '480px',
+        backgroundColor:
+          tank.status === 'normal'
+            ? 'rgba(255,255,255,0.9)'
+            : 'no_port'
+              ? 'rgba(217, 217, 217, 0.1)'
+              : 'no_probe'
+                ? 'rgba(255,255,255,0.9)'
+                : rgba(217, 217, 217, 0.1),
+      }}
+    >
       {/* ซ้าย: วงกลมกราฟน้ำมัน */}
       <div className="text-center p-2 d-flex flex-column align-items-center" style={{ flex: 1 }}>
         <DemoLiquid theme={theme} color={tank.fuel_color || '#5a5a5a'} percent={tank.fuel_percent} />
@@ -50,15 +68,18 @@ const TankCard = React.memo(({ tank, theme }) => {
       <div style={{ flex: 2 }} className="d-flex flex-column justify-content-between h-100 ps-2">
         <div className="d-flex align-items-center justify-content-between">
           <strong className="ml-1">{tank.tank_name}</strong>
-          <span
-            style={{
-              display: 'inline-block',
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              backgroundColor: statusColor,
-            }}
-          ></span>
+          <div className="d-flex align-items-center">
+            <span className="me-2">{tank.status}</span>
+            <span
+              style={{
+                display: 'inline-block',
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: statusColor,
+              }}
+            ></span>
+          </div>
         </div>
 
         <div className="p-2 border rounded mt-2">
