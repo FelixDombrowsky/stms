@@ -9,10 +9,27 @@ const Dashboard = () => {
   const [tanks, setTanks] = useState([])
 
   useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const newTheme = document.documentElement.getAttribute('data-coreui-theme')
+      setTheme(newTheme)
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-coreui-theme'],
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    console.log('Theme changed:', theme)
+  }, [theme])
+
+  useEffect(() => {
     if (!socket) return
 
     socket.on('tank_update', (data) => {
-      console.log('✅ Received update:', data)
+      // console.log('✅ Received update:', data)
+      // console.log('theme:', theme)
 
       setTanks((prevTanks) => {
         const map = new Map()
@@ -25,7 +42,7 @@ const Dashboard = () => {
         //2) ใหม่ replace หรือ เพิ่ม
         data.forEach((newTank) => {
           map.set(newTank.tank_code, { ...map.get(newTank.tank_code), ...newTank })
-          console.log('newTank:', newTank.fuel_percent)
+          // console.log('newTank:', newTank.fuel_percent)
         })
 
         // 3) คืนค่า array ใหม่

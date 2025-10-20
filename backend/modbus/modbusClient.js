@@ -45,6 +45,24 @@ export const connectPort = async () => {
     await client.connectRTUBuffered(SERIAL_PORT, { baudRate: BAUD_RATE })
     client.setTimeout(TIMEOUT_MS)
 
+    // ดัก error ของ client ทันทีหลังจากเชื่อม
+    client.on("error", (err) => {
+      console.error("⚠️ Modbus client error:", err.message)
+      connected = false
+      setStatus("no_port")
+      connectPort() // auto reconnect
+    })
+
+    // ดัก error ของ SerialPort ภายใน (ถ้ามี)
+    if (client._port && client._port.on) {
+      client._port.on("error", (err) => {
+        console.error("⚠️ SerialPort error:", err.message)
+        connected = false
+        setStatus("no_port")
+        connectPort()
+      })
+    }
+
     connected = true
     setStatus("normal")
     console.log(`✅ Connected to Modbus successfully!`)

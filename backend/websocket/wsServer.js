@@ -4,11 +4,15 @@ import { tankCache, loadTankCache } from "../services/configCache.js"
 import { readAllProbes } from "../modbus/readAllProbes.js"
 import { connectPort } from "../modbus/modbusClient.js"
 import { formatTankData } from "../services/formatTankData.js"
+import { writeTankData } from "../services/influxServices.js"
 
 let lastPayloadStr = null
 let pollingTimer = null
 let isPolling = true // เปิดปิดการทำงานของรอบ polling
 let isReading = false // true ขณะกำลังอ่าน (ป้องกันชนพอร์ต)
+
+let lastInfluxWrite = 0
+const INFLUX_INTERVAL = 5000 // 5 วิ
 
 export const pausePolling = () => {
   isPolling = false
@@ -80,12 +84,20 @@ export const initWebSocket = (server) => {
       //   return rest
       // })
 
-      // แปลง rawArray เป็น string เพื่อเช็คการเปลี่ยนแปลง
+      // ส่งไป front-end ทุก 1 วิ
       const payloadStr = JSON.stringify(formatted)
-
       if (payloadStr !== lastPayloadStr) {
         io.emit("tank_update", formatted)
         lastPayloadStr = payloadStr
+      }
+
+      // เขียนลงใน influxDB ทุก 5 วิ
+      const now = Date.now()
+      if (now - lastInfluxWrite >= INFLUX_INTERVAL) {
+        lastInfluxWrite = now
+        for (const tank of formatted) {
+          writeTankData(tank)
+        }
       }
     } catch (err) {
       console.error("Polling error:", err.message)
