@@ -54,62 +54,138 @@ const TankGuide = () => {
     if (name === 'tankCode') setTankCode(value)
     if (name === 'height_step') setHeightStep(parseInt(value))
     if (name === 'model') setModel(Number(value))
-    console.log('code :', tankCode)
-    console.log('h_step:', heightStep)
-  }
-
-  const fetchTankData = async () => {
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
-      console.log('Tank data : ', data)
-
-      setTanks(data)
-      if (!tankCode) {
-        setTankCode(data[0].code)
-      }
-    } catch (err) {
-      console.error(`Fetch Tank Data Error : ${err}`)
-    }
-  }
-
-  const fetchTankGuideCal = async () => {
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`)
-      console.log('payload :,', data.data)
-      console.log('Tank Cal : ', data)
-      setAllTankCal(data.data)
-      setTankCode(data.data[0].tank_code)
-    } catch (err) {
-      console.error(`Fetch Tank Data Error : ${err}`)
-    }
+    // console.log('code :', tankCode)
+    // console.log('h_step:', heightStep)
   }
 
   useEffect(() => {
-    fetchTankData()
-    fetchTankGuideCal()
+    const fetchAll = async () => {
+      try {
+        const [tankRes, calRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`),
+        ])
+
+        const tankData = tankRes.data
+        const calData = calRes.data.data
+
+        setTanks(tankData)
+        setAllTankCal(calData)
+
+        if (calData && calData.length > 0) {
+          setTankCode(calData[0].tank_code)
+        } else if (tankData && tankData.length > 0) {
+          setTankCode(tankData[0].code)
+        }
+      } catch (err) {
+        console.error('Fetch Error:', err)
+      }
+    }
+
+    fetchAll()
   }, [])
 
   useEffect(() => {
-    allTankCal.forEach((item) => {
-      if (item.tank_code === tankCode) {
-        setTankCal(item.data)
-      }
-    })
-    fetchTankData()
-    tanks.forEach((item) => {
-      if (item.code === tankCode) {
-        if (item.auto_status === 0) {
-          // setAutoMode(false)
-          setAutoIsOn(false)
-          console.log(`tank ${item.code} : auto ${item.auto_status}`)
-        } else {
-          // setAutoMode(true)
-          setAutoIsOn(true)
-          console.log(`tank ${item.code} : auto ${item.auto_status}`)
-        }
-      }
-    })
-  }, [tankCode])
+    // ถ้าข้อมูลยังไม่มา ไม่ต้องทำอะไร
+    if (!tankCode || tanks.length === 0 || allTankCal.length === 0) return
+
+    // หา tankCal สำหรับ tankCode
+    const cal = allTankCal.find((item) => item.tank_code === tankCode)
+    if (cal) {
+      setTankCal(cal.data)
+    }
+
+    // หา auto_status จาก tanks
+    const tankInfo = tanks.find((item) => item.code === tankCode)
+    if (tankInfo) {
+      setAutoIsOn(tankInfo.auto_status === 1)
+    }
+  }, [tankCode, tanks, allTankCal])
+
+  useEffect(() => {
+    if (tankCal.length === 0) {
+      setTankCalFilter([])
+      return
+    }
+
+    const filter = []
+    for (let i = 0; i < tankCal.length; i += heightStep) {
+      filter.push(tankCal[i])
+    }
+    setTankCalFilter(filter)
+  }, [tankCal, heightStep])
+
+  // const fetchTankData = async () => {
+  //   try {
+  //     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
+  //     console.log('Tank data : ', data)
+
+  //     // setTanks(data)
+  //     // if (!tankCode) {
+  //     //   setTankCode(data[0].code)
+  //     return setTankData(data)
+  //     // }
+  //   } catch (err) {
+  //     console.error(`Fetch Tank Data Error : ${err}`)
+  //   }
+  // }
+
+  // const fetchTankGuideCal = async () => {
+  //   try {
+  //     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`)
+  //     // console.log('payload :,', data.data)
+  //     // console.log('Tank Cal : ', data)
+  //     // setAllTankCal(data.data)
+  //     // setTankCode(data.data[0].tank_code)
+  //     return setCalData(data)
+  //   } catch (err) {
+  //     console.error(`Fetch Tank Data Error : ${err}`)
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   Promise.all([fetchTankData(), fetchTankGuideCal()]).then(([tankData, calData]) => {
+  //     setTanks(tankData)
+  //     setAllTankCal(calData)
+  //     setTankCode(calData[0].tank_code)
+  //   })
+  // }, [])
+
+  // useEffect(() => {
+  //   if (!tankCode || allTankCal.length === 0 || tanks.length === 0) return
+  //   const cal = allTankCal.find((item) => item.tank_code === tankCode)
+  //   if (cal) setTankCal(cal.data)
+
+  //   const tank = tanks.find((item) => item.code === tankCode)
+  //   if (tank) setAutoIsOn(tank.auto_status === 1)
+  // }, [tankCode, allTankCal, tanks])
+
+  // useEffect(() => {
+  //   fetchTankData()
+  //   fetchTankGuideCal()
+  // }, [])
+
+  // useEffect(() => {
+  //   allTankCal.forEach((item) => {
+  //     if (item.tank_code === tankCode) {
+  //       setTankCal(item.data)
+  //     }
+  //   })
+  //   fetchTankData()
+  //   tanks.forEach((item) => {
+  //     if (item.code === tankCode) {
+  //       if (item.auto_status === 0) {
+  //         // setAutoMode(false)
+  //         setAutoIsOn(false)
+  //         console.log(`tank ${item.code} : auto ${item.auto_status}`)
+  //       } else {
+  //         // setAutoMode(true)
+  //         setAutoIsOn(true)
+  //         console.log(`tank ${item.code} : auto ${item.auto_status}`)
+  //       }
+  //     }
+  //   })
+  // }, [tankCode])
 
   // useEffect(() => {
   //   if (tanks.length > 0 && !tankCode) {
@@ -117,14 +193,15 @@ const TankGuide = () => {
   //   }
   // }, [tanks])
 
-  useEffect(() => {
-    const filter_data = []
-    for (let i = 0; i < tankCal.length; i += heightStep) {
-      filter_data.push(tankCal[i])
-    }
-    setTankCalFilter(filter_data)
-    // console.log('Tank Filter:', tankCalFilter)
-  }, [heightStep, tankCal])
+  // useEffect(() => {
+  //   if (tankCal.length === 0) return
+  //   const filter_data = []
+  //   for (let i = 0; i < tankCal.length; i += heightStep) {
+  //     filter_data.push(tankCal[i])
+  //   }
+  //   setTankCalFilter(filter_data)
+  //   // console.log('Tank Filter:', tankCalFilter)
+  // }, [heightStep, tankCal])
 
   const handleExportExcel = async () => {
     if (!tankCalFilter || tankCalFilter.length === 0) {

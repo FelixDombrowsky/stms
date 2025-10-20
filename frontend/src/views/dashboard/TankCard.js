@@ -163,7 +163,8 @@ const TankCard = ({ tank, theme }) => {
           </div>
         </div>
 
-        <div className="d-flex align-items-center justify-content-between p-2">
+        {/* Water */}
+        <div className="d-flex align-items-center justify-content-between p-2 mt-2">
           <div>
             <Droplet size={16} className="me-1 mb-1" />
             <span className="me-1">Water</span>
@@ -186,7 +187,6 @@ const TankCard = ({ tank, theme }) => {
   )
 }
 
-/** ✅ ใช้ React.memo + custom compare */
 export default React.memo(TankCard, (prevProps, nextProps) => {
   if (prevProps.theme !== nextProps.theme) return false
   if (prevProps.tank !== nextProps.tank) return false

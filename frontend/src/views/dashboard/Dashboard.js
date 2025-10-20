@@ -139,7 +139,7 @@ const Dashboard = () => {
   return (
     <>
       <CCardBody>
-        <CRow className="g-0 ms-1 me-0">
+        <CRow className="g-3 ms-5 me-0">
           {tanks.map((tank) => (
             <CCol xs={12} md={6} key={tank.tank_code}>
               <TankCard tank={tank} theme={theme} />
