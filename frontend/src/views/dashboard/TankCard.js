@@ -82,14 +82,15 @@ const TankCard = ({ tank, theme }) => {
 
   return (
     <CCard
-      className="p-3 d-flex flex-row align-items-center mb-1 m-1"
+      className="p-3 d-flex flex-row align-items-center mb-5 m-1 w-100 me-3 ms-3"
       style={{
-        maxWidth: '480px',
+        maxWidth: '550px',
+        // width: '100%',
         backgroundColor: cardColor,
       }}
     >
       {/* วงกลมกราฟ */}
-      <div className="text-center p-2 d-flex flex-column align-items-center" style={{ flex: 1 }}>
+      <div className="text-center p-2 d-flex flex-column align-items-center w-25 me-4 ms-3">
         <DemoLiquid
           key={theme} // ✅ theme เปลี่ยน → re-mount Liquid
           theme={theme}
@@ -103,7 +104,7 @@ const TankCard = ({ tank, theme }) => {
       </div>
 
       {/* ข้อมูล Tank */}
-      <div style={{ flex: 2 }} className="d-flex flex-column justify-content-between ps-2">
+      <div className="d-flex flex-column justify-content-between ps-2 w-75">
         <div className="d-flex align-items-center justify-content-between">
           <strong>{tank.tank_name}</strong>
           <div className="d-flex align-items-center">

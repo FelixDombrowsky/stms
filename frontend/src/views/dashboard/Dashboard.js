@@ -42,7 +42,7 @@ const Dashboard = () => {
         //2) ใหม่ replace หรือ เพิ่ม
         data.forEach((newTank) => {
           map.set(newTank.tank_code, { ...map.get(newTank.tank_code), ...newTank })
-          // console.log('newTank:', newTank.fuel_percent)
+          console.log('newTank:', newTank)
         })
 
         // 3) คืนค่า array ใหม่
@@ -139,9 +139,9 @@ const Dashboard = () => {
   return (
     <>
       <CCardBody>
-        <CRow className="g-3 ms-5 me-0">
+        <CRow className="g-0 ms-1 me-0 ">
           {tanks.map((tank) => (
-            <CCol xs={12} md={6} key={tank.tank_code}>
+            <CCol xs={12} md={6} key={tank.tank_code} className="d-flex align-items-center justify-content-center">
               <TankCard tank={tank} theme={theme} />
             </CCol>
           ))}

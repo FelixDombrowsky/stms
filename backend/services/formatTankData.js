@@ -61,6 +61,11 @@ export const formatTankData = (raw, info) => {
     water_volume = (A * water_h) / 1_000_000
   }
 
+  // Magnetostrictive Volume
+  if (info.probe_type_id === 2) {
+    oil_volume = oil_volume - water_volume
+  }
+
   // --- 7) กันค่าติดลบ
   oil_volume = Math.max(Number(oil_volume.toFixed(2)), 0)
   water_volume = Math.max(Number(water_volume.toFixed(2)), 0)

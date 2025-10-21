@@ -275,7 +275,7 @@ const AddProbeModal = ({
                   value={form.water_h_address}
                   onChange={handleChange}
                   required
-                  disabled={form.probe_type_id == 3}
+                  disabled={form.probe_type_id == 3 || form.probe_type_id == 1}
                   className="flex-grow-1"
                 >
                   <option value="" disabled>
