@@ -7,6 +7,7 @@ import { initWebSocket } from "./websocket/wsServer.js"
 import fuelRoutes from "./routes/fuelRoutes.js"
 import probeRoutes from "./routes/probeRoutes.js"
 import tankRoutes from "./routes/tankRoutes.js"
+import funcRoutes from "./routes/funcRoutes.js"
 
 dotenv.config()
 
@@ -22,6 +23,7 @@ app.use(cors())
 app.use("/api/fuel", fuelRoutes)
 app.use("/api/probe", probeRoutes)
 app.use("/api/tank", tankRoutes)
+app.use("/api/function", funcRoutes)
 
 // WebSocket
 initWebSocket(server)

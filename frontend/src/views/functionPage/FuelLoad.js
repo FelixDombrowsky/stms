@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import axios from 'axios'
 import {
   CCard,
   CCardBody,
@@ -28,88 +30,76 @@ import {
 } from '@coreui/icons'
 
 const FuelLoad = () => {
+  const [fuelLoads, setFuelLoads] = useState([])
+  const [tanks, setTanks] = useState([])
+
   const [loadData, setLoadData] = useState([])
   const [autoIsOn, setAutoIsOn] = useState(1)
   const [startLoad, setStartLoad] = useState(0)
 
   const [tankCode, setTankCode] = useState('001')
+
+  const sidebarShow = useSelector((state) => state.sidebarShow)
+
   const handleExportExcel = () => {
     console.log('export excel')
   }
 
-  const tanks = [
-    {
-      code: '001',
-    },
-  ]
+  const fetchFuelLoad = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/function/fuelLoad/all`)
+      console.log('FuelLoad Data :', data)
+      const formatted = data.map((item) => ({
+        id: item.id,
+        tank_code: item.tank_code,
+        tank_name: item.tank_name,
+        v_order: item.v_order,
+        start_date: item.start_date,
+        end_date: item.end_date,
+        v_start: item.v_start,
+        v_end: item.v_end,
+        v_load: item.v_load,
+        description: item.description,
+        diff: item.v_load - item.v_order,
+      }))
+      setFuelLoads(formatted)
+    } catch (err) {
+      console.error(`Fetch Fuel Load Error : ${err}`)
+    }
+  }
+  const fetchTanks = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
+      console.log('tanks :', data)
+      setTanks(data)
+    } catch (err) {
+      console.error(`Fetch Tank Error : ${err}`)
+    }
+  }
+
+  useEffect(() => {
+    fetchFuelLoad()
+    fetchTanks()
+  }, [])
 
   // กัน user refresh หน้าจอ
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault()
-      event.returnValue = '' // จำเป็นต้องมีในบาง browser เช่น Chrome
-    }
+  // useEffect(() => {
+  //   const handleBeforeUnload = (event) => {
+  //     event.preventDefault()
+  //     event.returnValue = '' // จำเป็นต้องมีในบาง browser เช่น Chrome
+  //   }
 
-    window.addEventListener('beforeunload', handleBeforeUnload)
+  //   window.addEventListener('beforeunload', handleBeforeUnload)
 
-    // cleanup เมื่อออกจากหน้า
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
-  }, [startLoad])
+  //   // cleanup เมื่อออกจากหน้า
+  //   return () => {
+  //     window.removeEventListener('beforeunload', handleBeforeUnload)
+  //   }
+  // }, [startLoad])
 
   return (
     <>
-      {/* <CRow className="align-items-center mb-3">
-        
-        <CCol md={6} className="d-flex align-items-center">
-          <CFormLabel htmlFor="tank" className="mb-0 me-2 ms-3">
-            <b>Tank :</b>
-          </CFormLabel>
-          <CFormSelect
-            id="tankCode"
-            name="tankCode"
-            value={tankCode}
-            // onChange={handleChange}
-            style={{ width: '120px' }}
-          >
-            {tanks.map((item, index) => (
-              <option value={item.code} key={index}>
-                {item.code}
-              </option>
-            ))}
-          </CFormSelect>
-        </CCol>
-        <CCol md={6} className="d-flex align-items-center text-end">
-          <CButton
-            color="success"
-            size="md"
-            className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3"
-            style={{
-              border: '2px solid #ffffffff',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 255, 255)'
-              e.currentTarget.style.transform = 'translateY(-1px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            <CIcon icon={cilPaintBucket} size="xl" className="me-2 ms-2" style={{ color: '#fff' }} />
-            <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
-              Loading
-            </p>
-          </CButton>
-        </CCol>
-      </CRow> */}
-      {/* <CForm>
-        <CFormInput type="text" placeholder="กรอกข้อมูล..." />
-      </CForm> */}
-      <div className="d-flex justify-content-between mb-2">
+      <div className="d-flex justify-content-between mb-3">
         <div className="d-flex justify-content-between align-items-center">
           <CFormLabel htmlFor="tank" className="mb-0 me-2 ms-3">
             <b>Tank :</b>
@@ -123,7 +113,7 @@ const FuelLoad = () => {
           >
             {tanks.map((item, index) => (
               <option value={item.code} key={index}>
-                {item.code}
+                {item.tank_name}
               </option>
             ))}
           </CFormSelect>
@@ -135,7 +125,7 @@ const FuelLoad = () => {
               setStartLoad(1)
             }}
             size="md"
-            className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3 me-3"
+            className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3 me-2"
             style={{
               border: '2px solid #ffffffff',
               boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
@@ -158,7 +148,13 @@ const FuelLoad = () => {
         </div>
       </div>
 
-      <CCard>
+      <CCard
+        style={{
+          transition: 'all 0.3s ease',
+          width: sidebarShow ? '100%' : '100%', // ✅ ปรับขนาดเมื่อ Sidebar เปิด/ปิด
+          marginLeft: sidebarShow ? '0' : '0', // ✅ ขยับเนื้อหาให้พอด
+        }}
+      >
         <CCardHeader
           style={{
             background: '#4B79A1',
@@ -167,6 +163,8 @@ const FuelLoad = () => {
             letterSpacing: '0.5px',
             borderBottom: '2px solid #2c3e50',
             boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.2)',
+            // width: sidebarShow ? 'calc(100% - 250px)' : '100%',
+            // marginLeft: sidebarShow ? '250px' : '0',
           }}
         >
           <div className="pb-2 pt-2">
@@ -189,7 +187,7 @@ const FuelLoad = () => {
               </CButton>
             </div>
           </div>
-          <div style={{ textAlign: 'end' }} className="me-3 mt-3 mb-2 d-flex align-items-center">
+          <div style={{ textAlign: 'end' }} className="me-3 mt-3 mb-1 d-flex align-items-center">
             <CButton
               className="d-flex align-items-center"
               color="secondary"
@@ -228,21 +226,44 @@ const FuelLoad = () => {
         </div>
 
         <CCardBody>
-          <CCard>
+          <CCard style={{ border: 0, padding: 0 }}>
             <CSmartTable
-              items={loadData}
+              items={fuelLoads}
               columns={[
-                // { key: 'step', label: 'Step', _style: { width: '20px' } },
-                { key: 'height', label: 'Height (mm)', _style: { width: '50%' } },
-                { key: 'volume', label: 'Volume (L)', _style: { width: '50%' }, sorter: false },
+                { key: 'id', label: 'Id', _style: { width: '60px', textAlign: 'center' } },
+                { key: 'tank_name', label: 'Tank' },
+                { key: 'description', label: 'Descript' },
+                { key: 'start_date', label: 'Date Start' },
+                { key: 'end_date', label: 'Date End' },
+                { key: 'v_start', label: 'V Start(L)', _style: { width: '110px' } },
+                { key: 'v_end', label: 'V End(L)' },
+                { key: 'v_end', label: 'V End(L)' },
+                { key: 'v_load', label: 'Actual V(L)' },
+                { key: 'v_order', label: 'Order V(L)' },
+                { key: 'diff', label: 'Diff(L)' },
+                { key: 'actions', label: '', _style: { width: '50px' }, filter: false, sorter: false },
+
                 // { key: 'actions', label: '', _style: { width: '20px' }, filter: false, sorter: false },
               ]}
               columnSorter
               columnFilter
-              tableProps={{ striped: true, hover: true, responsive: true }}
+              tableProps={{ hover: true, responsive: true }}
               tableBodyProps={{ className: 'align-middle' }}
-              itemsPerPage={7}
+              itemsPerPage={5}
               pagination
+              scopedColumns={{
+                id: (item) => <td className="text-start ps-3">{item.id}</td>,
+                actions: (item) => (
+                  <td className="text-center" style={{ whiteSpace: 'nowrap' }}>
+                    <CButton className="me-3 p-0">
+                      <CIcon icon={cilPencil} />
+                    </CButton>
+                    <CButton className="p-0">
+                      <CIcon icon={cilTrash} />
+                    </CButton>
+                  </td>
+                ),
+              }}
             />
           </CCard>
         </CCardBody>

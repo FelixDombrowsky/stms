@@ -19,14 +19,27 @@ export const getTankSettings = async (req, res) => {
         code: "asc",
       },
     })
-    // const result = await pool.query(`
-    //      SELECT p.*, s.fuel_name
-    //      FROM tank_setting p
-    //      JOIN fuel_names s ON p.fuel_code = s.fuel_code
-    //      ORDER BY p.code ASC
-    //   `)
-    // await refreshTankCache() // <-- รีเฟรช cache
-    res.status(200).send(tankSettings)
+    const formatted = tankSettings.map((item) => ({
+      code: item.code,
+      tank_name: item.tank_name,
+      probe_id: Number(item.probe_id),
+      fuel_code: item.fuel_code,
+      fuel_name: item.fuel_name.fuel_name,
+      capacity_l: Number(item.capacity_l),
+      tank_type: Number(item.tank_type),
+      vertical_mm: Number(item.vertical_mm),
+      horizontal_mm: Number(item.horizontal_mm),
+      length_mm: Number(item.length_mm),
+      cal_capacity_l: Number(item.cal_capacity_l),
+      comp_oil_mm: Number(item.comp_oil_mm),
+      comp_water_mm: Number(item.comp_water_mm),
+      high_alarm_l: Number(item.high_alarm_l),
+      high_alert_l: Number(item.high_alert_l),
+      low_alarm_l: Number(item.low_alarm_l),
+      water_high_alarm_l: Number(item.water_high_alarm_l),
+      auto_status: Number(item.auto_status),
+    }))
+    res.status(200).json(formatted)
   } catch (err) {
     console.error(err)
     res
