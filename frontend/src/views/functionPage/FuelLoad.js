@@ -30,19 +30,24 @@ import {
 } from '@coreui/icons'
 
 const FuelLoad = () => {
-  const [fuelLoads, setFuelLoads] = useState([])
+  const [fuelLoads, setFuelLoads] = useState([]) // เก็บทุกข้อมูล fuelload
+  const [filterFuelLoad, setFilterFuelLoad] = useState([]) // เก็บแค่ fuelload ที่ตรงกับ tankcode ที่เลือกใน filter
   const [tanks, setTanks] = useState([])
+  const [tankCode, setTankCode] = useState('')
 
   const [loadData, setLoadData] = useState([])
   const [autoIsOn, setAutoIsOn] = useState(1)
   const [startLoad, setStartLoad] = useState(0)
 
-  const [tankCode, setTankCode] = useState('001')
-
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
   const handleExportExcel = () => {
     console.log('export excel')
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    if (name === 'tankCode') setTankCode(value)
   }
 
   const fetchFuelLoad = async () => {
@@ -60,7 +65,7 @@ const FuelLoad = () => {
         v_end: item.v_end,
         v_load: item.v_load,
         description: item.description,
-        diff: item.v_load - item.v_order,
+        diff: Number((item.v_load - item.v_order).toFixed(2)),
       }))
       setFuelLoads(formatted)
     } catch (err) {
@@ -72,10 +77,17 @@ const FuelLoad = () => {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
       console.log('tanks :', data)
       setTanks(data)
+      setTankCode(data[0].code)
     } catch (err) {
       console.error(`Fetch Tank Error : ${err}`)
     }
   }
+
+  useEffect(() => {
+    console.log('tank code :', tankCode)
+    const filter_fuelLoad = fuelLoads.filter((item) => item.tank_code === tankCode)
+    setFilterFuelLoad(filter_fuelLoad)
+  }, [fuelLoads, tanks, tankCode])
 
   useEffect(() => {
     fetchFuelLoad()
@@ -108,7 +120,7 @@ const FuelLoad = () => {
             id="tankCode"
             name="tankCode"
             value={tankCode}
-            // onChange={handleChange}
+            onChange={handleChange}
             style={{ width: '120px' }}
           >
             {tanks.map((item, index) => (
@@ -228,7 +240,7 @@ const FuelLoad = () => {
         <CCardBody>
           <CCard style={{ border: 0, padding: 0 }}>
             <CSmartTable
-              items={fuelLoads}
+              items={filterFuelLoad}
               columns={[
                 { key: 'id', label: 'Id', _style: { width: '60px', textAlign: 'center' } },
                 { key: 'tank_name', label: 'Tank' },

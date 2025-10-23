@@ -1,4 +1,4 @@
-import prisma from "../db.js"
+import prisma from "../db.js";
 
 // Fuel Load
 export const getFuelLoads = async (req, res) => {
@@ -11,7 +11,10 @@ export const getFuelLoads = async (req, res) => {
           },
         },
       },
-    })
+      orderBy: {
+        id: "desc", // เรียงข้อมูลจากมากไปน้อย ()
+      },
+    });
     const formatted = fuelLoads.map((item) => ({
       id: Number(item.id),
       tank_code: item.tank_code,
@@ -23,10 +26,12 @@ export const getFuelLoads = async (req, res) => {
       v_end: Number(item.v_end),
       v_load: Number(item.v_load),
       description: item.description,
-    }))
-    res.status(200).json(formatted)
+    }));
+    res.status(200).json(formatted);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: "Read FuelLoad Error", error: err.message })
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Read FuelLoad Error", error: err.message });
   }
-}
+};
