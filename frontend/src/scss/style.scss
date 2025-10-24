@@ -102,3 +102,10 @@ textarea::placeholder {
   border-radius: 5px;
   margin-right: 10px; /* ✅ ใช้งานได้จริง */
 }
+
+@media (max-width: 768px) {
+  .tank-container {
+    flex-wrap: wrap !important; /* ✅ ให้ wrap เฉพาะจอเล็กกว่า iPad */
+    justify-content: center !important;
+  }
+}

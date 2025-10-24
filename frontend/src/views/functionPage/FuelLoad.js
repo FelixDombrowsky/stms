@@ -15,6 +15,10 @@ import {
   CFormSelect,
   CForm,
   CFormInput,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react'
 import {
@@ -33,11 +37,14 @@ const FuelLoad = () => {
   const [fuelLoads, setFuelLoads] = useState([]) // เก็บทุกข้อมูล fuelload
   const [filterFuelLoad, setFilterFuelLoad] = useState([]) // เก็บแค่ fuelload ที่ตรงกับ tankcode ที่เลือกใน filter
   const [tanks, setTanks] = useState([])
-  const [tankCode, setTankCode] = useState('')
 
-  const [loadData, setLoadData] = useState([])
-  const [autoIsOn, setAutoIsOn] = useState(1)
-  const [startLoad, setStartLoad] = useState(0)
+  //Form State
+  const [tankCode, setTankCode] = useState('')
+  const [orderVol, setOrderVol] = useState('')
+  const [dateStart, setDateStart] = useState('')
+  const [dateEnd, setDateEnd] = useState('')
+
+  const [addVisible, setAddVisible] = useState(false)
 
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
@@ -48,6 +55,12 @@ const FuelLoad = () => {
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === 'tankCode') setTankCode(value)
+    if (name === 'orderVol') setOrderVol(value)
+    console.log('Date Start:', dateStart)
+    console.log('Date End:', dateEnd)
+    console.log('Date Start (ISO) :', dateStart.toISOString())
+    console.log('Date End (ISO) :', dateEnd.toISOString())
+    // if (name === 'dateRange') setDateRange(value)
   }
 
   const fetchFuelLoad = async () => {
@@ -83,6 +96,10 @@ const FuelLoad = () => {
     }
   }
 
+  const fetchFuelLevel = async () => {
+    
+  }
+
   useEffect(() => {
     console.log('tank code :', tankCode)
     const filter_fuelLoad = fuelLoads.filter((item) => item.tank_code === tankCode)
@@ -93,6 +110,112 @@ const FuelLoad = () => {
     fetchFuelLoad()
     fetchTanks()
   }, [])
+
+  useEffect(() => {
+    console.log('Date Start:', dateStart)
+    console.log('Date End:', dateEnd)
+
+    if (dateStart instanceof Date) {
+      console.log('Date Start (ISO):', dateStart.toISOString())
+    } else {
+      console.log('Date Start (string):', dateStart)
+    }
+
+    if (dateEnd instanceof Date) {
+      console.log('Date End (ISO):', dateEnd.toISOString())
+    } else {
+      console.log('Date End (string):', dateEnd)
+    }
+
+    if (dateStart instanceof Date && dateEnd instanceof Date) {
+      console.log('👋 Fetch Time')
+      fetchFuelLevel()
+    }
+  }, [dateStart, dateEnd])
+
+  const handleSubmit = () => {
+    console.log('handle submit')
+  }
+
+  const addFuelLoad = () => {
+    return (
+      <CModal visible={addVisible} onClose={() => setAddVisible(false)} size="lg" className="modal">
+        <CModalHeader className="h5 fw-bold">Add Fuel Load</CModalHeader>
+        <CModalBody className="me-5">
+          <CForm onSubmit={handleSubmit}>
+            {/* แถวแรก */}
+            <CRow className="mb-3">
+              <CCol md={6} className="d-flex align-items-center">
+                <div className="w-50 text-end pe-2">
+                  <CFormLabel htmlFor="tankCode" className="mb-0 fw-semibold">
+                    Tank :
+                  </CFormLabel>
+                </div>
+                <div className="w-50">
+                  <CFormSelect id="tankCode" name="tankCode" value={tankCode} onChange={handleChange} disabled>
+                    {tanks.map((item, index) => (
+                      <option value={item.code} key={index}>
+                        {item.tank_name}
+                      </option>
+                    ))}
+                  </CFormSelect>
+                </div>
+              </CCol>
+
+              <CCol md={6} className="d-flex align-items-center">
+                <CFormLabel htmlFor="orderVol" className="mb-0 me-2 fw-semibold" style={{ width: '160px' }}>
+                  Order Vol (L) :
+                </CFormLabel>
+
+                <CFormInput
+                  id="orderVol"
+                  name="orderVol"
+                  value={orderVol}
+                  type="number"
+                  step="any"
+                  min="0"
+                  onChange={handleChange}
+                  maxLength={20}
+                  placeholder="Enter fuel volume"
+                  required
+                />
+              </CCol>
+            </CRow>
+
+            {/* แถว 2 */}
+            <CRow className="mb-3 ms-5">
+              <CCol md={12} className="d-flex align-items-center text-center">
+                <div className=" text-start pe-2">
+                  <CFormLabel htmlFor="dateRange" className="mb-0 me-2 fw-semibold">
+                    Date Range :
+                  </CFormLabel>
+                </div>
+                <div>
+                  <CDateRangePicker
+                    startDate={dateStart}
+                    endDate={dateEnd}
+                    onStartDateChange={(date) => setDateStart(date)}
+                    onEndDateChange={(date) => setDateEnd(date)}
+                    timepicker={true}
+                    portal={false}
+                    locale="th"
+                    // inputDateParse={(date) => parse(date, 'dd/MM/yyyy HH:mm:ss', new Date())}
+                    // inputDateFormat={(date) => format(new Date(date), 'dd/MM/yyyy HH:mm:ss')}
+                  />
+                </div>
+              </CCol>
+            </CRow>
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setAddVisible(false)}>
+            Cancel
+          </CButton>
+          <CButton color="primary">Save</CButton>
+        </CModalFooter>
+      </CModal>
+    )
+  }
 
   // กัน user refresh หน้าจอ
   // useEffect(() => {
@@ -131,7 +254,7 @@ const FuelLoad = () => {
           </CFormSelect>
         </div>
         <div>
-          <CButton
+          {/* <CButton
             color="success"
             onClick={() => {
               setStartLoad(1)
@@ -156,7 +279,7 @@ const FuelLoad = () => {
             <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
               Start Load
             </p>
-          </CButton>
+          </CButton> */}
         </div>
       </div>
 
@@ -228,10 +351,13 @@ const FuelLoad = () => {
                 e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
+              onClick={() => {
+                setAddVisible(true)
+              }}
             >
               <CIcon icon={cilPlus} size="xl" className="me-2 ms-2" style={{ color: '#fff' }} />
               <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
-                Add Data
+                Loading
               </p>
             </CButton>
           </div>
@@ -244,7 +370,6 @@ const FuelLoad = () => {
               columns={[
                 { key: 'id', label: 'Id', _style: { width: '60px', textAlign: 'center' } },
                 { key: 'tank_name', label: 'Tank' },
-                { key: 'description', label: 'Descript' },
                 { key: 'start_date', label: 'Date Start' },
                 { key: 'end_date', label: 'Date End' },
                 { key: 'v_start', label: 'V Start(L)', _style: { width: '110px' } },
@@ -253,6 +378,7 @@ const FuelLoad = () => {
                 { key: 'v_load', label: 'Actual V(L)' },
                 { key: 'v_order', label: 'Order V(L)' },
                 { key: 'diff', label: 'Diff(L)' },
+                { key: 'description', label: 'Descript' },
                 { key: 'actions', label: '', _style: { width: '50px' }, filter: false, sorter: false },
 
                 // { key: 'actions', label: '', _style: { width: '20px' }, filter: false, sorter: false },
@@ -280,6 +406,7 @@ const FuelLoad = () => {
           </CCard>
         </CCardBody>
       </CCard>
+      {addVisible === true && addFuelLoad()}
     </>
   )
 }

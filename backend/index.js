@@ -8,6 +8,7 @@ import fuelRoutes from "./routes/fuelRoutes.js"
 import probeRoutes from "./routes/probeRoutes.js"
 import tankRoutes from "./routes/tankRoutes.js"
 import funcRoutes from "./routes/funcRoutes.js"
+import fuelLevelRoutes from "./routes/fuelLevelRoutes.js"
 
 dotenv.config()
 
@@ -24,6 +25,7 @@ app.use("/api/fuel", fuelRoutes)
 app.use("/api/probe", probeRoutes)
 app.use("/api/tank", tankRoutes)
 app.use("/api/function", funcRoutes)
+app.use("/api/fuelLevel", fuelLevelRoutes)
 
 // WebSocket
 initWebSocket(server)
