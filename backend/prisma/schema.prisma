@@ -117,5 +117,11 @@ model fuel_load {
   v_load      Decimal  @db.Decimal(12, 2)
   description String?  @db.Text
 
+  // for Auto Calibrate
+  v1_auto Decimal  @db.Decimal(12, 2)
+  h1_auto Decimal  @db.Decimal(12, 2) 
+  v2_auto Decimal  @db.Decimal(12, 2)
+  h2_auto Decimal  @db.Decimal(12, 2) 
+
   //  @@map("fuel_load")
 }

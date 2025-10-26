@@ -33,6 +33,7 @@ const TankGuide = () => {
   const [allTankCal, setAllTankCal] = useState([])
   const [tankCal, setTankCal] = useState([])
   const [tankCalFilter, setTankCalFilter] = useState([])
+  const [autoCalibrate, setAutoCalibrate] = useState([])
 
   const [tankCode, setTankCode] = useState('')
   const [heightStep, setHeightStep] = useState(10)
@@ -61,7 +62,7 @@ const TankGuide = () => {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [tankRes, calRes] = await Promise.all([
+        const [tankRes, calRes, fuelLoaadRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`),
         ])
@@ -98,7 +99,9 @@ const TankGuide = () => {
     // หา auto_status จาก tanks
     const tankInfo = tanks.find((item) => item.code === tankCode)
     if (tankInfo) {
-      setAutoIsOn(tankInfo.auto_status === 1)
+      setAutoIsOn(tankInfo.auto_status === 1) // ถ้าเป็น 1 เก็บ AutoIsOn เป็น true ถ้าไม่เก็บเป็น false
+      console.log('Auto is on', tankInfo.auto_status === 1)
+      if (tankInfo.auto_status) fetchFuelLoadAuto()
     }
   }, [tankCode, tanks, allTankCal])
 
@@ -114,6 +117,16 @@ const TankGuide = () => {
     }
     setTankCalFilter(filter)
   }, [tankCal, heightStep])
+
+  const fetchFuelLoadAuto = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/fuelLoad/${tankCode}`)
+      console.log('Fuel Load Data :', data)
+      setAutoCalibrate(data.data)
+    } catch (err) {
+      console.error('Fetch Fuel Load Error:', err)
+    }
+  }
 
   // const fetchTankData = async () => {
   //   try {
@@ -700,7 +713,7 @@ const TankGuide = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CSmartTable
-                    items={tankAdjustTable}
+                    items={autoCalibrate}
                     columns={[
                       { key: 'height', label: 'Height (mm)', _style: { width: '45%' } },
                       { key: 'volume', label: 'Volume (L)', _style: { width: '45%' }, sorter: false },
@@ -740,7 +753,7 @@ const TankGuide = () => {
                       ),
                     }}
                   />
-                  {manualTable.length !== 0 && (
+                  {autoCalibrate.length !== 0 && (
                     <CButton
                       color="primary"
                       size="sm"

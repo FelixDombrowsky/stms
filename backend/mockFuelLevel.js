@@ -22,7 +22,7 @@ const tanks = [
 // จำลองข้อมูลในช่วงการโหลด
 const simulateFuelLoad = async () => {
   const startTime = new Date();
-  for (let minute = 0; minute <= 10; minute++) {
+  for (let minute = 0; minute <= 30; minute++) {
     const timestamp = new Date(startTime.getTime() + minute * 60000);
 
     for (const tank of tanks) {

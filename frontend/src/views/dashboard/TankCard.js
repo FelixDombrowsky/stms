@@ -434,227 +434,370 @@ const TankCard = ({ tank, theme }) => {
     //   </CRow>
     // </>
 
-    <CRow className="gx-4 gy-2 mb-5">
+    // <CRow className=" gy-2 mb-5">
+    //   {/* LEFT CARD */}
+    //   <CCol
+    //     xs={12}
+    //     md={5}
+    //     className="p-4"
+    //     style={{
+    //       minHeight: '250px', // ให้ auto ได้ แต่มีขั้นต่ำ
+    //       maxHeight: '300px',
+    //       width: '150px',
+    //       borderRadius: '20px',
+    //       background: cardColor,
+    //       backdropFilter: 'blur(16px)',
+    //       WebkitBackdropFilter: 'blur(16px)',
+    //       boxShadow:
+    //         theme === 'dark'
+    //           ? '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
+    //           : '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
+    //       color: theme === 'dark' ? '#eaeaea' : '#333',
+    //       transition: 'all 0.3s ease',
+    //       cursor: 'pointer',
+    //     }}
+    //     onMouseEnter={(e) => {
+    //       e.currentTarget.style.transform = 'translateY(-3px)'
+    //       e.currentTarget.style.boxShadow =
+    //         theme === 'dark' ? '0 10px 30px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.15)'
+    //     }}
+    //     onMouseLeave={(e) => {
+    //       e.currentTarget.style.transform = 'translateY(0)'
+    //       e.currentTarget.style.boxShadow =
+    //         theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)'
+    //     }}
+    //   >
+    //     <div className="text-center d-flex flex-column align-items-center h-100 justify-content-center">
+    //       <h6
+    //         className="fw-bold mb-3"
+    //         style={{
+    //           fontSize: '1.1rem',
+    //           letterSpacing: '0.4px',
+    //           color: theme === 'dark' ? '#fff' : '#111',
+    //         }}
+    //       >
+    //         {tank.tank_name}
+    //       </h6>
+
+    //       <DemoLiquid key={theme} theme={theme} color={tank.fuel_color || '#5a5a5a'} percent={percent} />
+
+    //       <div className="mt-3">
+    //         <h6
+    //           className="fw-semibold"
+    //           style={{
+    //             fontSize: '0.95rem',
+    //             color: theme === 'dark' ? '#f5f5f5' : '#222',
+    //             letterSpacing: '0.3px',
+    //           }}
+    //         >
+    //           {tank.fuel_name}
+    //         </h6>
+    //       </div>
+    //     </div>
+    //   </CCol>
+
+    //   {/* RIGHT CARD */}
+    //   <CCol
+    //     xs={12}
+    //     md={7}
+    //     className="p-4"
+    //     style={{
+    //       minHeight: '250px',
+    //       maxHeight: '300px',
+    //       width: '300px',
+    //       borderRadius: '20px',
+    //       background: cardColor,
+    //       backdropFilter: 'blur(16px)',
+    //       WebkitBackdropFilter: 'blur(16px)',
+    //       boxShadow:
+    //         theme === 'dark'
+    //           ? '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
+    //           : '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
+    //       color: theme === 'dark' ? '#eaeaea' : '#333',
+    //       transition: 'all 0.3s ease',
+    //       cursor: 'pointer',
+    //     }}
+    //     onMouseEnter={(e) => {
+    //       e.currentTarget.style.transform = 'translateY(-3px)'
+    //       e.currentTarget.style.boxShadow =
+    //         theme === 'dark' ? '0 10px 30px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.15)'
+    //     }}
+    //     onMouseLeave={(e) => {
+    //       e.currentTarget.style.transform = 'translateY(0)'
+    //       e.currentTarget.style.boxShadow =
+    //         theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)'
+    //     }}
+    //   >
+    //     {/* เนื้อหาฝั่งขวา */}
+    //     <div className="d-flex flex-column justify-content-between h-100">
+    //       {/* ส่วนหัว */}
+    //       <div className="d-flex align-items-center justify-content-between mb-2 ms-2">
+    //         <h6
+    //           className="fw-bold mb-0"
+    //           style={{
+    //             fontSize: '1rem',
+    //             letterSpacing: '0.4px',
+    //             color: theme === 'dark' ? '#fff' : '#111',
+    //           }}
+    //         >
+    //           {/* Code : {tank.tank_code} */}
+    //         </h6>
+    //         <div className="d-flex align-items-center">
+    //           <span
+    //             className="me-2"
+    //             style={{
+    //               color: textColor,
+    //               fontWeight: '500',
+    //               fontSize: '0.9rem',
+    //             }}
+    //           >
+    //             {statusName}
+    //           </span>
+    //           <div
+    //             style={{
+    //               width: 12,
+    //               height: 12,
+    //               borderRadius: '50%',
+    //               backgroundColor: statusColor,
+    //               boxShadow: `0 0 6px ${statusColor}`,
+    //             }}
+    //           ></div>
+    //         </div>
+    //       </div>
+
+    //       {/* เนื้อหา */}
+    //       <div
+    //         className="p-3 rounded-4 mt-2 flex-grow-1"
+    //         style={{
+    //           background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
+    //           boxShadow: theme === 'dark' ? 'inset 0 0 12px rgba(255,255,255,0.05)' : 'inset 0 0 10px rgba(0,0,0,0.05)',
+    //           transition: 'background 0.3s ease',
+    //         }}
+    //       >
+    //         {/* ข้อมูลปริมาณเชื้อเพลิง */}
+    //         <div className="d-flex justify-content-between align-items-center mb-2">
+    //           <div className="d-flex align-items-center">
+    //             <Fuel size={18} className="me-2" />
+    //             <span style={{ fontWeight: 500 }}>Fuel</span>
+    //           </div>
+    //           <div style={{ fontSize: '0.85rem' }}>{tank.temp} °C</div>
+    //         </div>
+
+    //         <div className="mt-2 mb-2">
+    //           <span
+    //             style={{
+    //               fontWeight: '700',
+    //               fontSize: '1.1rem',
+    //               color: theme === 'dark' ? '#fff' : '#222',
+    //             }}
+    //           >
+    //             {tank.oil_volume.toLocaleString()} L
+    //           </span>
+    //           <span
+    //             style={{
+    //               marginLeft: '6px',
+    //               fontSize: '0.9rem',
+    //               color: theme === 'dark' ? '#aaa' : '#666',
+    //             }}
+    //           >
+    //             / {tank.capacity_l.toLocaleString()} L
+    //           </span>
+    //           <div
+    //             className="progress rounded-pill mt-3"
+    //             style={{
+    //               height: '7px',
+    //               background: theme === 'dark' ? '#1b1b1b' : '#ddd',
+    //             }}
+    //           >
+    //             <div
+    //               className="progress-bar"
+    //               role="progressbar"
+    //               style={{
+    //                 width: `${tank.fuel_percent}%`,
+    //                 backgroundColor: tank.fuel_color || '#5a5a5a',
+    //                 borderRadius: '10px',
+    //               }}
+    //             ></div>
+    //           </div>
+    //         </div>
+
+    //         <div className="d-flex justify-content-between align-items-center mt-2">
+    //           <span style={{ fontSize: '0.85rem' }}>
+    //             ULG: {(tank.capacity_l - (tank.oil_volume + tank.water_volume)).toLocaleString()} L
+    //           </span>
+    //           <span style={{ fontSize: '0.85rem' }}>{tank.oil_height} mm</span>
+    //         </div>
+    //       </div>
+
+    //       {/* ส่วนท้าย */}
+    //       <div className="d-flex align-items-center justify-content-between p-2 mt-3 ms-1 me-1">
+    //         <div className="d-flex align-items-center">
+    //           <Droplet size={16} className="me-1 mb-1" />
+    //           <span>Water</span>
+    //         </div>
+    //         <div>
+    //           <span
+    //             style={{
+    //               fontSize: '0.95rem',
+    //               fontWeight: 'bold',
+    //               color: theme === 'dark' ? '#fff' : '#222',
+    //             }}
+    //           >
+    //             {tank.water_volume} L
+    //           </span>
+    //           <span
+    //             style={{
+    //               marginLeft: '6px',
+    //               fontSize: '0.85rem',
+    //               color: theme === 'dark' ? '#aaa' : '#666',
+    //             }}
+    //           >
+    //             {tank.water_height} mm
+    //           </span>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </CCol>
+    // </CRow>
+
+    <div
+      className="tank-card d-flex flex-wrap justify-content-center align-items-stretch gap-2 mb-4"
+      style={{
+        width: '100%',
+      }}
+    >
       {/* LEFT CARD */}
-      <CCol
-        xs={12}
-        md={5}
-        className="p-4"
+      <div
+        className="left-card p-4 d-flex flex-column justify-content-center align-items-center"
         style={{
-          minHeight: '250px', // ให้ auto ได้ แต่มีขั้นต่ำ
-          borderRadius: '20px',
-          background: cardColor,
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          boxShadow:
-            theme === 'dark'
-              ? '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-              : '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
-          color: theme === 'dark' ? '#eaeaea' : '#333',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-3px)'
-          e.currentTarget.style.boxShadow =
-            theme === 'dark' ? '0 10px 30px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.15)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)'
-          e.currentTarget.style.boxShadow =
-            theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)'
-        }}
-      >
-        <div className="text-center d-flex flex-column align-items-center h-100 justify-content-center">
-          <h6
-            className="fw-bold mb-3"
-            style={{
-              fontSize: '1.1rem',
-              letterSpacing: '0.4px',
-              color: theme === 'dark' ? '#fff' : '#111',
-            }}
-          >
-            Tank : {tank.tank_name}
-          </h6>
-
-          <DemoLiquid key={theme} theme={theme} color={tank.fuel_color || '#5a5a5a'} percent={percent} />
-
-          <div className="mt-3">
-            <h6
-              className="fw-semibold"
-              style={{
-                fontSize: '0.95rem',
-                color: theme === 'dark' ? '#f5f5f5' : '#222',
-                letterSpacing: '0.3px',
-              }}
-            >
-              {tank.fuel_name}
-            </h6>
-          </div>
-        </div>
-      </CCol>
-
-      {/* RIGHT CARD */}
-      <CCol
-        xs={12}
-        md={7}
-        className="p-4"
-        style={{
+          flex: '1 1 130px',
+          minWidth: '100px',
+          maxWidth: '380px',
           minHeight: '250px',
           borderRadius: '20px',
           background: cardColor,
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          boxShadow:
-            theme === 'dark'
-              ? '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-              : '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
-          color: theme === 'dark' ? '#eaeaea' : '#333',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-3px)'
-          e.currentTarget.style.boxShadow =
-            theme === 'dark' ? '0 10px 30px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.15)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)'
-          e.currentTarget.style.boxShadow =
-            theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)'
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          boxShadow: theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)',
         }}
       >
-        {/* เนื้อหาฝั่งขวา */}
-        <div className="d-flex flex-column justify-content-between h-100">
-          {/* ส่วนหัว */}
-          <div className="d-flex align-items-center justify-content-between mb-2 ms-2">
-            <h6
-              className="fw-bold mb-0"
+        <h6
+          className="fw-bold mb-3"
+          style={{
+            fontSize: '1.1rem',
+            color: theme === 'dark' ? '#fff' : '#111',
+          }}
+        >
+          {tank.tank_name}
+        </h6>
+        <DemoLiquid key={theme} theme={theme} color={tank.fuel_color || '#5a5a5a'} percent={percent} />
+        <h6
+          className="fw-semibold mt-3"
+          style={{
+            fontSize: '0.95rem',
+            color: theme === 'dark' ? '#f5f5f5' : '#222',
+          }}
+        >
+          {tank.fuel_name}
+        </h6>
+      </div>
+
+      {/* RIGHT CARD */}
+      <div
+        className="right-card p-4 d-flex flex-column justify-content-between"
+        style={{
+          flex: '2 1 250px', // 👉 ขวากว้างกว่าซ้าย 2 เท่า
+          minWidth: '200px',
+          maxWidth: '400px',
+          minHeight: '250px',
+          borderRadius: '20px',
+          background: cardColor,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          boxShadow: theme === 'dark' ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.08)',
+        }}
+      >
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <span
+            className="fw-semibold"
+            style={{
+              fontSize: '1rem',
+              color: theme === 'dark' ? '#fff' : '#111',
+            }}
+          >
+            {statusName}
+          </span>
+          <div
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              backgroundColor: statusColor,
+              boxShadow: `0 0 6px ${statusColor}`,
+            }}
+          ></div>
+        </div>
+
+        <div
+          className="p-3 rounded-4 mt-2 flex-grow-1"
+          style={{
+            background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
+            boxShadow: theme === 'dark' ? 'inset 0 0 12px rgba(255,255,255,0.05)' : 'inset 0 0 10px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="d-flex align-items-center">
+              <Fuel size={18} className="me-2" />
+              <span style={{ fontWeight: 500 }}>Fuel</span>
+            </div>
+            <div style={{ fontSize: '0.85rem' }}>{tank.temp} °C</div>
+          </div>
+
+          <div className="mt-2 mb-2">
+            <span style={{ fontWeight: '700', fontSize: '1.1rem' }}>{tank.oil_volume.toLocaleString()} L</span>
+            <span style={{ marginLeft: '6px', fontSize: '0.9rem' }}>/ {tank.capacity_l.toLocaleString()} L</span>
+
+            <div
+              className="progress rounded-pill mt-3"
               style={{
-                fontSize: '1rem',
-                letterSpacing: '0.4px',
-                color: theme === 'dark' ? '#fff' : '#111',
+                height: '7px',
+                background: theme === 'dark' ? '#1b1b1b' : '#ddd',
               }}
             >
-              Code : {tank.tank_code}
-            </h6>
-            <div className="d-flex align-items-center">
-              <span
-                className="me-2"
-                style={{
-                  color: textColor,
-                  fontWeight: '500',
-                  fontSize: '0.9rem',
-                }}
-              >
-                {statusName}
-              </span>
               <div
+                className="progress-bar"
+                role="progressbar"
                 style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  backgroundColor: statusColor,
-                  boxShadow: `0 0 6px ${statusColor}`,
+                  width: `${tank.fuel_percent}%`,
+                  backgroundColor: tank.fuel_color || '#5a5a5a',
+                  borderRadius: '10px',
                 }}
               ></div>
             </div>
           </div>
 
-          {/* เนื้อหา */}
-          <div
-            className="p-3 rounded-4 mt-2 flex-grow-1"
-            style={{
-              background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
-              boxShadow: theme === 'dark' ? 'inset 0 0 12px rgba(255,255,255,0.05)' : 'inset 0 0 10px rgba(0,0,0,0.05)',
-              transition: 'background 0.3s ease',
-            }}
-          >
-            {/* ข้อมูลปริมาณเชื้อเพลิง */}
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <div className="d-flex align-items-center">
-                <Fuel size={18} className="me-2" />
-                <span style={{ fontWeight: 500 }}>Fuel</span>
-              </div>
-              <div style={{ fontSize: '0.85rem' }}>{tank.temp} °C</div>
-            </div>
-
-            <div className="mt-2 mb-2">
-              <span
-                style={{
-                  fontWeight: '700',
-                  fontSize: '1.1rem',
-                  color: theme === 'dark' ? '#fff' : '#222',
-                }}
-              >
-                {tank.oil_volume.toLocaleString()} L
-              </span>
-              <span
-                style={{
-                  marginLeft: '6px',
-                  fontSize: '0.9rem',
-                  color: theme === 'dark' ? '#aaa' : '#666',
-                }}
-              >
-                / {tank.capacity_l.toLocaleString()} L
-              </span>
-              <div
-                className="progress rounded-pill mt-3"
-                style={{
-                  height: '7px',
-                  background: theme === 'dark' ? '#1b1b1b' : '#ddd',
-                }}
-              >
-                <div
-                  className="progress-bar"
-                  role="progressbar"
-                  style={{
-                    width: `${tank.fuel_percent}%`,
-                    backgroundColor: tank.fuel_color || '#5a5a5a',
-                    borderRadius: '10px',
-                  }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="d-flex justify-content-between align-items-center mt-2">
-              <span style={{ fontSize: '0.85rem' }}>
-                ULG: {(tank.capacity_l - (tank.oil_volume + tank.water_volume)).toLocaleString()} L
-              </span>
-              <span style={{ fontSize: '0.85rem' }}>{tank.oil_height} mm</span>
-            </div>
-          </div>
-
-          {/* ส่วนท้าย */}
-          <div className="d-flex align-items-center justify-content-between p-2 mt-3 ms-1 me-1">
-            <div className="d-flex align-items-center">
-              <Droplet size={16} className="me-1 mb-1" />
-              <span>Water</span>
-            </div>
-            <div>
-              <span
-                style={{
-                  fontSize: '0.95rem',
-                  fontWeight: 'bold',
-                  color: theme === 'dark' ? '#fff' : '#222',
-                }}
-              >
-                {tank.water_volume} L
-              </span>
-              <span
-                style={{
-                  marginLeft: '6px',
-                  fontSize: '0.85rem',
-                  color: theme === 'dark' ? '#aaa' : '#666',
-                }}
-              >
-                {tank.water_height} mm
-              </span>
-            </div>
+          <div className="d-flex justify-content-between align-items-center mt-2">
+            <span style={{ fontSize: '0.85rem' }}>
+              ULG: {(tank.capacity_l - (tank.oil_volume + tank.water_volume)).toLocaleString()} L
+            </span>
+            <span style={{ fontSize: '0.85rem' }}>{tank.oil_height} mm</span>
           </div>
         </div>
-      </CCol>
-    </CRow>
+
+        <div className="d-flex align-items-center justify-content-between p-2 mt-3">
+          <div className="d-flex align-items-center">
+            <Droplet size={16} className="me-1 mb-1" />
+            <span>Water</span>
+          </div>
+          <div>
+            <span style={{ fontWeight: 'bold' }}>{tank.water_volume} L</span>
+            <span style={{ marginLeft: '6px', fontSize: '0.85rem' }}>{tank.water_height} mm</span>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
