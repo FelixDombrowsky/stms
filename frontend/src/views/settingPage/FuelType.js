@@ -25,6 +25,7 @@ import {
   CCardHeader,
   CModalContent,
   CFormLabel,
+  CFormTextarea,
 } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPen, cilPencil, cilTrash } from '@coreui/icons'
@@ -40,13 +41,18 @@ const FuelType = () => {
   // form
   const [code, setCode] = useState('')
   const [type, setType] = useState('')
-  const [density, setDensity] = useState('')
+  const [description, setDescription] = useState('')
 
   const fetchData = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/fuel/type`)
       console.log('data0:', data[0])
-      setFuelType(data)
+      const formatted = data.map((item) => ({
+        fuel_type_code: item.fuel_type_code,
+        fuel_type_name: item.fuel_type_name,
+        description: item.description,
+      }))
+      setFuelType(formatted)
 
       console.log(`fuelType data :`, data)
     } catch (err) {
@@ -61,7 +67,7 @@ const FuelType = () => {
   const clearForm = () => {
     setCode('')
     setType('')
-    setDensity('')
+    setDescription('')
   }
 
   const handleChange = (e) => {
@@ -69,9 +75,7 @@ const FuelType = () => {
     const { name, value } = e.target
     if (name === 'code') setCode(value)
     if (name === 'type') setType(value)
-    if (name === 'density') setDensity(value)
-
-    console.log('density:', density)
+    if (name === 'description') setDescription(value)
   }
 
   const handleSubmit = async (e) => {
@@ -85,10 +89,6 @@ const FuelType = () => {
       alert(`fuel type is null!, please fill it again.`)
       return
     }
-    if (!density || density.trim() === '') {
-      alert(`Density is null!, please fill it again.`)
-      return
-    }
 
     for (let i = 0; i < fuelType.length; i++) {
       console.log(`i:${i}`)
@@ -99,22 +99,22 @@ const FuelType = () => {
       }
     }
 
-    const densityNum = Number(parseFloat(density).toFixed(2))
-    console.log('desnity Num : ', densityNum)
-    if (isNaN(densityNum)) {
-      alert(`Density must be a number!`)
-      return
-    }
-    if (densityNum < 1 || densityNum > 1000) {
-      alert(` Density must be between 1-1000 kg/m³`)
-      return
-    }
+    // const densityNum = Number(parseFloat(density).toFixed(2))
+    // console.log('desnity Num : ', densityNum)
+    // if (isNaN(densityNum)) {
+    //   alert(`Density must be a number!`)
+    //   return
+    // }
+    // if (densityNum < 1 || densityNum > 1000) {
+    //   alert(` Density must be between 1-1000 kg/m³`)
+    //   return
+    // }
 
     try {
       const payload = {
         fuel_type_code: code.trim(),
         fuel_type_name: type.trim(),
-        density: densityNum,
+        description: description,
       }
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/fuel/type`, payload)
       console.log(`data: `, data)
@@ -130,7 +130,7 @@ const FuelType = () => {
 
       setCode('')
       setType('')
-      setDensity('')
+      setDescription('')
 
       setAddVisible(false)
     } catch (err) {
@@ -169,26 +169,22 @@ const FuelType = () => {
       alert(`fuel type is null!, please fill it again.`)
       return
     }
-    if (!density || density.trim() === '') {
-      alert(`Density is null!, please fill it again.`)
-      return
-    }
 
-    const densityNum = Number(parseFloat(density).toFixed(2))
-    console.log('desnity Num : ', densityNum)
-    if (isNaN(densityNum)) {
-      alert(`Density must be a number!`)
-      return
-    }
-    if (densityNum < 1 || densityNum > 1000) {
-      alert(` Density must be between 1-1000 kg/m³`)
-      return
-    }
+    // const densityNum = Number(parseFloat(density).toFixed(2))
+    // console.log('desnity Num : ', densityNum)
+    // if (isNaN(densityNum)) {
+    //   alert(`Density must be a number!`)
+    //   return
+    // }
+    // if (densityNum < 1 || densityNum > 1000) {
+    //   alert(` Density must be between 1-1000 kg/m³`)
+    //   return
+    // }
 
     try {
       const payload = {
         fuel_type_name: type.trim(),
-        density: densityNum,
+        description: description,
       }
       const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/fuel/type/${code}`, payload)
       console.log(`edit data: `, data)
@@ -203,7 +199,7 @@ const FuelType = () => {
 
       setCode('')
       setType('')
-      setDensity('')
+      setDescription('')
       setUpdateVisible(false)
       fetchData()
     } catch (err) {
@@ -260,10 +256,10 @@ const FuelType = () => {
 
             <CRow className="mb-3 align-items-center">
               <CCol md={4} className="text-end pe-2">
-                <CFormLabel className="m-0 fw-semibold">Fuel Density (kg/m3) :</CFormLabel>
+                <CFormLabel className="m-0 fw-semibold">Description:</CFormLabel>
               </CCol>
               <CCol md={8} className="text-start w-50">
-                <CFormInput
+                {/* <CFormInput
                   name="density"
                   value={density}
                   maxLength={8}
@@ -274,7 +270,14 @@ const FuelType = () => {
                   placeholder={'e.g. 870.00'}
                   onChange={handleChange}
                   required
-                />
+                /> */}
+                <CFormTextarea
+                  name="description"
+                  value={description}
+                  type="textarea"
+                  rows={1}
+                  onChange={handleChange}
+                ></CFormTextarea>
               </CCol>
             </CRow>
 
@@ -374,10 +377,10 @@ const FuelType = () => {
 
             <CRow className="mb-3 align-items-center">
               <CCol md={4} className="text-end pe-2">
-                <CFormLabel className="m-0 fw-semibold">Fuel Density (kg/m3) :</CFormLabel>
+                <CFormLabel className="m-0 fw-semibold">Description :</CFormLabel>
               </CCol>
               <CCol md={8} className="text-start w-50">
-                <CFormInput
+                {/* <CFormInput
                   name="density"
                   value={density}
                   maxLength={8}
@@ -388,7 +391,14 @@ const FuelType = () => {
                   placeholder={'e.g. 870.00'}
                   onChange={handleChange}
                   required
-                />
+                /> */}
+                <CFormTextarea
+                  name="description"
+                  value={description}
+                  type="textarea"
+                  rows={1}
+                  onChange={handleChange}
+                ></CFormTextarea>
               </CCol>
             </CRow>
 
@@ -419,37 +429,56 @@ const FuelType = () => {
       {updateVisible === true && updateFuelType()}
 
       <CCard>
-        <CCardHeader className="mb-2">
-          <CRow className="align-items-center">
-            <CCol xs={8}>
-              <h5 className="mb-0 fw-bold">Fuel Type</h5>
-            </CCol>
-
-            <CCol xs={4} className="d-flex justify-content-end">
+        <CCardHeader
+          style={{
+            background: '#4B79A1',
+            color: 'white',
+            fontWeight: '600',
+            letterSpacing: '0.5px',
+            borderBottom: '2px solid #2c3e50',
+            boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.2)',
+          }}
+          className="pt-3 pb-3"
+        >
+          <h6 className="mb-0 fw-bold">Fuel Type</h6>
+        </CCardHeader>
+        <CCardBody className="mt-0 mb-0 p-3">
+          <div className="d-flex mb-1 mt-0 justify-content-end">
+            <div>
               <CButton
                 color="primary"
-                className="me-2
-                 d-flex align-items-center"
-                style={{ whiteSpace: 'nowrap' }}
+                size="md"
+                className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3 mb-0"
+                style={{
+                  border: '2px solid #ffffffff',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 255, 255)'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
                 onClick={() => {
                   setAddVisible(true)
-                  console.log('Click')
-                  console.log(addVisible)
                 }}
               >
-                <CIcon icon={cilPlus} className="me-2" />
-                Add Fuel Type
+                <CIcon icon={cilPlus} size="xl" className="me-2 ms-2" style={{ color: '#fff' }} />
+                <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
+                  Fuel Type
+                </p>
               </CButton>
-            </CCol>
-          </CRow>
-        </CCardHeader>
-        <CCardBody className="mt-2 mb-3 p-3">
+            </div>
+          </div>
           <CSmartTable
             items={fuelType}
             columns={[
-              { key: 'fuel_type_code', label: 'code', _style: { width: '20%' } },
-              { key: 'fuel_type_name', label: 'type', _style: { width: '35%' } },
-              { key: 'density', label: 'density (kg/m3)', _style: { width: '35%' } },
+              { key: 'fuel_type_code', label: 'Code', _style: { width: '20%' } },
+              { key: 'fuel_type_name', label: 'Type', _style: { width: '35%' } },
+              { key: 'description', label: 'Description', _style: { width: '35%' } },
               { key: 'actions', label: '', _style: { width: '10%' }, filter: false, sorter: false },
             ]}
             columnFilter
@@ -464,7 +493,7 @@ const FuelType = () => {
                     onClick={() => {
                       setCode(item.fuel_type_code)
                       setType(item.fuel_type_name)
-                      setDensity(item.density)
+                      setDescription(item.description)
                       setUpdateVisible(true)
                     }}
                   >
@@ -478,7 +507,7 @@ const FuelType = () => {
             }}
             tableProps={{
               responsive: true,
-              striped: true,
+
               hover: true,
             }}
             tableBodyProps={{

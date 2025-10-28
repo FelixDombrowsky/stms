@@ -39,6 +39,8 @@ const Dashboard = () => {
           map.set(t.tank_code, t)
         })
 
+        console.log('data = ', data)
+        console.log('data type :', typeof data)
         //2) ใหม่ replace หรือ เพิ่ม
         data.forEach((newTank) => {
           map.set(newTank.tank_code, { ...map.get(newTank.tank_code), ...newTank })

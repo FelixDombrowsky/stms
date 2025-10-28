@@ -37,7 +37,7 @@ export async function loadTankCache() {
       // Fuel
       fuel_name: item.fuel_name?.fuel_name ?? null,
       fuel_color: item.fuel_name?.fuel_color ?? null,
-      density: Number(item.fuel_name?.fuel_type?.density ?? 0),
+      density: Number(item.fuel_name?.density ?? 0),
 
       // Probe
       probe_type_id: item.probe_setting?.probe_type_id ?? null,

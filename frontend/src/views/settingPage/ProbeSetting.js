@@ -193,41 +193,72 @@ const ProbeSetting = () => {
         probes={probes}
       />
       <CCard>
-        <CCardHeader className="mb-0">
-          <CRow className="align-items-center">
-            <CCol xs={8}>
-              <h5 className="mb-0 fw-bold">Probe Setting</h5>
-            </CCol>
-
-            <CCol xs={4} className="d-flex justify-content-end">
-              <CButton
-                color="primary"
-                className="me-2 d-flex align-items-center mb-2"
-                style={{ whiteSpace: 'nowrap' }}
-                onClick={() => {
-                  setForm({
-                    probe_id: '',
-                    probe_type_id: '',
-                    oil_h_address: '',
-                    oil_h_scale: '1',
-                    water_h_address: '',
-                    water_h_scale: '1',
-                    temp_address: '',
-                    temp_scale: '1',
-                    address_length: '',
-                    format: '',
-                    function_code: '',
-                  })
-                  setVisible(true)
-                }}
-              >
-                <CIcon icon={cilPlus} className="me-2" />
-                Add Probe
-              </CButton>
-            </CCol>
-          </CRow>
+        <CCardHeader
+          className="pt-3 pb-3 mb-0"
+          style={{
+            background: '#4B79A1',
+            color: 'white',
+            fontWeight: '600',
+            letterSpacing: '0.5px',
+            borderBottom: '2px solid #2c3e50',
+            boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.2)',
+          }}
+        >
+          <h6 className="mb-0 fw-bold">Probe Setting</h6>
         </CCardHeader>
-        <CCardBody className="mt-2 mb-3 p-3">
+        <CCardBody className="mt-0 mb-0 p-3">
+          <div className="d-flex justify-content-end mb-1">
+            {/* <CButton
+              color="primary"
+              className="me-2 d-flex align-items-center mb-2"
+              style={{ whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setForm({
+                  probe_id: '',
+                  probe_type_id: '',
+                  oil_h_address: '',
+                  oil_h_scale: '1',
+                  water_h_address: '',
+                  water_h_scale: '1',
+                  temp_address: '',
+                  temp_scale: '1',
+                  address_length: '',
+                  format: '',
+                  function_code: '',
+                })
+                setVisible(true)
+              }}
+            >
+              <CIcon icon={cilPlus} className="me-2" />
+              Add Probe
+            </CButton> */}
+            <CButton
+              color="primary"
+              size="md"
+              className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3 mb-0"
+              style={{
+                border: '2px solid #ffffffff',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 255, 255)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+              onClick={() => {
+                setVisible(true)
+              }}
+            >
+              <CIcon icon={cilPlus} size="xl" className="me-2 ms-2" style={{ color: '#fff' }} />
+              <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
+                Probe
+              </p>
+            </CButton>
+          </div>
           <CSmartTable
             items={probes} // ✅ ใช้ probes จาก API แทน mock data
             columns={[
@@ -309,7 +340,7 @@ const ProbeSetting = () => {
             }}
             tableProps={{
               responsive: true,
-              striped: true,
+              // striped: true,
               hover: true,
             }}
             tableBodyProps={{

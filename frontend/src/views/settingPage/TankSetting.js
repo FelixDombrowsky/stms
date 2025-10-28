@@ -89,12 +89,13 @@ const TankSetting = () => {
   const fetchTankData = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`)
-      console.log('Tank data : ', data)
+      // console.log('Tank data : ', data)
       const formatted = data.map((item) => ({
         code: item.code,
         tank_name: item.tank_name,
         probe_id: item.probe_id,
         fuel_code: item.fuel_code,
+        fuel_name: item.fuel_name,
         capacity_l: item.capacity_l,
         tank_type: item.tank_type,
         vertical_mm: item.vertical_mm,
@@ -107,8 +108,8 @@ const TankSetting = () => {
         high_alert_l: item.high_alert_l,
         low_alarm_l: item.low_alarm_l,
         water_high_alarm_l: item.water_high_alarm_l,
-        fuel_name: item.fuel_name?.fuel_name || null,
       }))
+      console.log('Formatted Data :', formatted)
 
       setTanks(formatted)
     } catch (err) {
@@ -304,19 +305,19 @@ const TankSetting = () => {
       alert(`Tank Name is null!, please fill it again.`)
       return
     }
-    if (!capacity || capacity.trim() === '') {
+    if (!capacity) {
       alert(`Capacity is null!, please fill it again.`)
       return
     }
-    if (!vertical || vertical.trim() === '') {
+    if (!vertical) {
       alert(`Vertical is null!, please fill it again.`)
       return
     }
-    if (!horizontal || horizontal.trim() === '') {
+    if (!horizontal) {
       alert(`Horizontal is null!, please fill it again.`)
       return
     }
-    if (!tankLength || tankLength.trim() === '') {
+    if (!tankLength) {
       alert(`Tank Length is null!, please fill it again.`)
       return
     }
@@ -330,19 +331,19 @@ const TankSetting = () => {
       alert(`Comp Water is null!, please fill it again.`)
       return
     }
-    if (!highAlarm || highAlarm.trim() === '') {
+    if (!highAlarm) {
       alert(`Oil High Alarm is null!, please fill it again.`)
       return
     }
-    if (!highAlert || highAlert.trim() === '') {
+    if (!highAlert) {
       alert(`Oil High Alert is null!, please fill it again.`)
       return
     }
-    if (!lowAlarm || lowAlarm.trim() === '') {
+    if (!lowAlarm) {
       alert(`Oil Low Alarm is null!, please fill it again.`)
       return
     }
-    if (isNaN(parseFloat(waterAlarm)) || waterAlarm.trim() === '') {
+    if (!waterAlarm) {
       alert(`Water High Alarm is null!, please fill it again.`)
       return
     }
@@ -1180,14 +1181,23 @@ const TankSetting = () => {
       {updateVisible === true && updateTank()}
 
       <CCard>
-        <CCardHeader>
-          <CRow className="align-items-center">
-            <CCol xs={8}>
-              <h5 className="mb-0 fw-bold">Tank Setting</h5>
-            </CCol>
-
-            <CCol xs={4} className="d-flex justify-content-end">
-              <CButton
+        <CCardHeader
+          className="pt-3 pb-3 mb-0"
+          style={{
+            background: '#4B79A1',
+            color: 'white',
+            fontWeight: '600',
+            letterSpacing: '0.5px',
+            borderBottom: '2px solid #2c3e50',
+            boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.2)',
+          }}
+        >
+          <h6 className="mb-0 fw-bold">Tank Setting</h6>
+        </CCardHeader>
+        <CCardBody className=" mb-3">
+          <div className="d-flex justify-content-end mb-1">
+            <div>
+              {/* <CButton
                 color="primary"
                 className="me-2
                      d-flex align-items-center"
@@ -1199,11 +1209,35 @@ const TankSetting = () => {
               >
                 <CIcon icon={cilPlus} className="me-2" />
                 Add New Tank
+              </CButton> */}
+              <CButton
+                color="primary"
+                size="md"
+                className="fw-semibold d-flex justify-content-between align-items-center ps-1 pe-3 pt-2 pb-2 ms-3 mb-0"
+                style={{
+                  border: '2px solid #ffffffff',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 255, 255)'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+                onClick={() => {
+                  setAddVisible(true)
+                }}
+              >
+                <CIcon icon={cilPlus} size="xl" className="me-2 ms-2" style={{ color: '#fff' }} />
+                <p className="mb-0 fw-bold fs-6" style={{ color: '#fff' }}>
+                  Tank
+                </p>
               </CButton>
-            </CCol>
-          </CRow>
-        </CCardHeader>
-        <CCardBody className=" mb-3">
+            </div>
+          </div>
           <CSmartTable
             items={tanks}
             columns={[
@@ -1257,7 +1291,7 @@ const TankSetting = () => {
             }}
             tableProps={{
               responsive: true,
-              striped: true,
+              // striped: true,
               hover: true,
             }}
             tableBodyProps={{

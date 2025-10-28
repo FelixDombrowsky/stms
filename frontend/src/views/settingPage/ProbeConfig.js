@@ -440,7 +440,7 @@ function ProbeConfig() {
             // }}
             tableProps={{
               responsive: true,
-              striped: true,
+              // striped: true,
               hover: true,
             }}
             tableBodyProps={{

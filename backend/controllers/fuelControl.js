@@ -19,7 +19,7 @@ export const getFuelTypes = async (req, res) => {
 
 export const addFuelTypes = async (req, res) => {
   try {
-    const { fuel_type_code, fuel_type_name, density } = req.body
+    const { fuel_type_code, fuel_type_name, description } = req.body
 
     if (!fuel_type_code || !fuel_type_name) {
       return res
@@ -31,7 +31,7 @@ export const addFuelTypes = async (req, res) => {
       data: {
         fuel_type_code,
         fuel_type_name,
-        density,
+        description,
       },
     })
 
@@ -88,7 +88,7 @@ export const deleteFuelTypes = async (req, res) => {
 export const updateFuelTypes = async (req, res) => {
   const { code } = req.params
   try {
-    const { fuel_type_name, density } = req.body
+    const { fuel_type_name, description } = req.body
 
     if (!fuel_type_name) {
       return res.status(400).json({ message: "fuel type name is required" })
@@ -97,7 +97,7 @@ export const updateFuelTypes = async (req, res) => {
     const updated = await prisma.fuel_type.update({
       data: {
         fuel_type_name,
-        density,
+        description,
       },
       where: {
         fuel_type_code: code,
@@ -134,7 +134,17 @@ export const getFuelNames = async (req, res) => {
         fuel_code: "asc",
       },
     })
-    res.status(200).json(fuelNames)
+    const formatted = fuelNames.map((item) => ({
+      fuel_code: item.fuel_code,
+      fuel_name: item.fuel_name,
+      density: Number(item.density),
+      fuel_color: item.fuel_color,
+      description: item.description,
+      fuel_type_code: item.fuel_type_code,
+      fuel_type_name: item.fuel_type.fuel_type_name,
+    }))
+
+    res.status(200).json(formatted)
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: "Read FuelName Error", error: err.message })
@@ -143,22 +153,29 @@ export const getFuelNames = async (req, res) => {
 
 export const addFuelNames = async (req, res) => {
   try {
-    const { fuel_code, fuel_name, description, fuel_type_code, fuel_color } =
-      req.body
+    const {
+      fuel_code,
+      fuel_name,
+      fuel_type_code,
+      density,
+      fuel_color,
+      description,
+    } = req.body
 
-    if (!fuel_code || !fuel_name || !fuel_type_code) {
-      return res
-        .status(400)
-        .json({ message: "fuel_code, fule_name, fuel_type_code are required" })
+    if (!fuel_code || !fuel_name || !fuel_type_code || !density) {
+      return res.status(400).json({
+        message: "fuel_code, fule_name, fuel_type_code, density are required",
+      })
     }
 
     const newFuelName = await prisma.fuel_name.create({
       data: {
         fuel_code,
         fuel_name,
-        description: description || null,
         fuel_type_code,
         fuel_color,
+        density: Number(parseFloat(density).toFixed(2)),
+        description: description || null,
       },
     })
     await refreshTankCache()
@@ -182,11 +199,12 @@ export const addFuelNames = async (req, res) => {
 export const updateFuelNames = async (req, res) => {
   const { code } = req.params
   try {
-    const { fuel_name, description, fuel_type_code, fuel_color } = req.body
-    if (!fuel_name || !fuel_type_code) {
+    const { fuel_name, fuel_type_code, density, fuel_color, description } =
+      req.body
+    if (!fuel_name || !fuel_type_code || !density) {
       return res
         .status(400)
-        .json({ message: "fuel_name, fuel_type_code are required" })
+        .json({ message: "fuel_name, fuel_type_code, density are required" })
     }
 
     const updated = await prisma.fuel_name.update({
@@ -194,7 +212,8 @@ export const updateFuelNames = async (req, res) => {
         fuel_name,
         fuel_type_code,
         fuel_color,
-        description,
+        density: Number(parseFloat(density).toFixed(2)),
+        description: description || null,
       },
       where: {
         fuel_code: code,

@@ -120,6 +120,7 @@ const AddProbeModal = ({
       setProbes(formattedData1)
 
       setVisible(false) // ปิด Modal
+
       setEditMode(false)
     } catch (err) {
       console.error('Error saving probe:', err)

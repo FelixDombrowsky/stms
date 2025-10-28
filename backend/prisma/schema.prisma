@@ -46,9 +46,9 @@ model probe_setting {
 /// ประเภทของเชื้อเพลิง (แม่)
 /// 1 fuel_type -> N fuel_name
 model fuel_type {
-  fuel_type_code String   @id @db.VarChar(10) // เช่น GAS, DSL, E20
+  fuel_type_code String   @id @db.VarChar(10)
   fuel_type_name String   @db.VarChar(50)
-  density        Decimal? @db.Decimal(10, 2)
+  description    String? @db.Text
 
   // Relation
   fuel_names fuel_name[]
@@ -57,11 +57,12 @@ model fuel_type {
 /// ชื่อเชื้อเพลิงแต่ละชนิด (ลูก)
 /// N fuel_name -> 1 fuel_type
 model fuel_name {
-  fuel_code      String  @id @db.VarChar(10) // เช่น G91, G95, B20
+  fuel_code      String  @id @db.VarChar(10) // 
   fuel_name      String  @db.VarChar(50)
   fuel_type_code String  @db.VarChar(10) // FK ไป fuel_type
   description    String? @db.Text
   fuel_color     String? @db.VarChar(50)
+  density        Decimal? @db.Decimal(10, 2)
 
   // Relation
   fuel_type fuel_type @relation(fields: [fuel_type_code], references: [fuel_type_code])

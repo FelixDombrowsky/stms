@@ -33,7 +33,7 @@ const TankGuide = () => {
   const [allTankCal, setAllTankCal] = useState([])
   const [tankCal, setTankCal] = useState([])
   const [tankCalFilter, setTankCalFilter] = useState([])
-  const [autoCalibrate, setAutoCalibrate] = useState([])
+  // const [autoCalibrate, setAutoCalibrate] = useState([])
 
   const [tankCode, setTankCode] = useState('')
   const [heightStep, setHeightStep] = useState(10)
@@ -62,7 +62,7 @@ const TankGuide = () => {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [tankRes, calRes, fuelLoaadRes] = await Promise.all([
+        const [tankRes, calRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/tank/setting`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/cal`),
         ])
@@ -101,7 +101,11 @@ const TankGuide = () => {
     if (tankInfo) {
       setAutoIsOn(tankInfo.auto_status === 1) // ถ้าเป็น 1 เก็บ AutoIsOn เป็น true ถ้าไม่เก็บเป็น false
       console.log('Auto is on', tankInfo.auto_status === 1)
-      if (tankInfo.auto_status) fetchFuelLoadAuto()
+      if (tankInfo.auto_status) {
+        fetchFuelLoadAuto()
+      } else {
+        setTankAdjustTable([])
+      }
     }
   }, [tankCode, tanks, allTankCal])
 
@@ -122,7 +126,8 @@ const TankGuide = () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/tank/guide/fuelLoad/${tankCode}`)
       console.log('Fuel Load Data :', data)
-      setAutoCalibrate(data.data)
+      // setAutoCalibrate(data.data)
+      setTankAdjustTable(data.data)
     } catch (err) {
       console.error('Fetch Fuel Load Error:', err)
     }
@@ -322,7 +327,7 @@ const TankGuide = () => {
       })
 
       // ✅ อัปเดตลง state manualTable
-      setManualTable(data)
+      // setManualTable(data)
       setTankAdjustTable(data)
 
       Swal.fire({
@@ -342,6 +347,83 @@ const TankGuide = () => {
         timer: 1500,
       })
     }
+  }
+
+  const handleExportTankAdjust = async () => {
+    if (!tankAdjustTable || tankAdjustTable.length === 0) {
+      Swal.fire({
+        position: 'top-end',
+        icon: 'error',
+        title: `No Data in Table!`,
+        showConfirmButton: false,
+        timer: 1500,
+      })
+      return
+    }
+
+    // 🔹 สร้าง workbook และ worksheet
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Tank Guide')
+
+    // 🔹 แถวที่ 1: ชื่อ Table
+    worksheet.addRow([`Table: ${tankCode || 'Unknown Tank'} Tank Guide Chart Adjustment`])
+    worksheet.mergeCells('A1:B1') // รวมช่อง A1-B1
+    const titleCell = worksheet.getCell('A1')
+    titleCell.font = { bold: true, size: 14 }
+    titleCell.alignment = { horizontal: 'center' }
+
+    //เว้นแถว
+    worksheet.addRow([])
+
+    //แถว Header
+    const headerRow = worksheet.addRow(['Height (mm)', 'Volume (L)'])
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' }
+
+    headerRow.height = 25
+    //ใส่สีพื้นหลัง header
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '4472C4' }, // สีฟ้าเข้ม
+      }
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFFFFF' } },
+        bottom: { style: 'thin', color: { argb: 'FFFFFF' } },
+      }
+    })
+
+    //ใส่ข้อมูล
+    tankAdjustTable.forEach((row) => {
+      const dataRow = worksheet.addRow([row.height, row.volume])
+      dataRow.eachCell((cell) => {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        cell.border = {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        }
+      })
+    })
+
+    //ปรับขนาดคอลัมน์อัตโนมัติ
+    worksheet.columns.forEach((col) => {
+      let maxLength = 0
+      col.eachCell({ includeEmpty: true }, (cell) => {
+        const cellLength = cell.value ? cell.value.toString().length : 10
+        if (cellLength > maxLength) maxLength = cellLength
+      })
+      col.width = maxLength + 3
+    })
+
+    //สร้างไฟล์และดาวน์โหลด
+    const buffer = await workbook.xlsx.writeBuffer()
+    saveAs(
+      new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      `tank_${tankCode || 'tank_data'}_guide_adjustment.xlsx`,
+    )
   }
 
   const fileInputRef = useRef(null)
@@ -430,21 +512,21 @@ const TankGuide = () => {
     }
   }
 
-  const handleUpdateAuto = async () => {}
+  // const handleUpdateAuto = async () => {}
 
   // useEffect(() => {
   //   console.log('useEffect AutoisOn:', autoIsOn)
   // }, [autoIsOn])
 
   const handleTrainModel = async () => {
-    if (manualTable.length === 0) {
+    if (tankAdjustTable.length === 0) {
       Swal.fire('Error', 'Please import calibration data first!', 'error')
       return
     }
 
     try {
       const payload = {
-        real_data: manualTable,
+        real_data: tankAdjustTable,
         tank_code: tankCode,
       }
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/tank/train`, payload)
@@ -665,7 +747,7 @@ const TankGuide = () => {
                     ]}
                     columnSorter
                     columnFilter
-                    tableProps={{ striped: true, hover: true, responsive: true }}
+                    tableProps={{ hover: true, responsive: true }}
                     tableBodyProps={{ className: 'align-middle' }}
                     itemsPerPage={7}
                     pagination
@@ -704,7 +786,10 @@ const TankGuide = () => {
                       color="primary"
                       size="sm"
                       variant="outline"
-                      onClick={() => console.log('Export CSV clicked')}
+                      onClick={() => {
+                        console.log('Export CSV clicked')
+                        handleExportTankAdjust()
+                      }}
                     >
                       <CIcon icon={cilArrowCircleTop} className="me-1" />
                       Export
@@ -713,7 +798,7 @@ const TankGuide = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CSmartTable
-                    items={autoCalibrate}
+                    items={tankAdjustTable}
                     columns={[
                       { key: 'height', label: 'Height (mm)', _style: { width: '45%' } },
                       { key: 'volume', label: 'Volume (L)', _style: { width: '45%' }, sorter: false },
@@ -721,7 +806,7 @@ const TankGuide = () => {
                     ]}
                     columnSorter
                     columnFilter
-                    tableProps={{ striped: true, hover: true, responsive: true }}
+                    tableProps={{ hover: true, responsive: true }}
                     tableBodyProps={{ className: 'align-middle' }}
                     itemsPerPage={7}
                     pagination
@@ -753,7 +838,7 @@ const TankGuide = () => {
                       ),
                     }}
                   />
-                  {autoCalibrate.length !== 0 && (
+                  {tankAdjustTable.length !== 0 && (
                     <CButton
                       color="primary"
                       size="sm"
@@ -776,7 +861,7 @@ const TankGuide = () => {
         </CCardBody>
 
         <CCardFooter className="text-end">
-          <small className="text-muted">Updated automatically from tank configuration</small>
+          <small className="text-muted">Reccommend more than 50 Data before train for the best result</small>
         </CCardFooter>
       </CCard>
     </>

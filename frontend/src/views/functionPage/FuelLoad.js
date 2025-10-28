@@ -916,6 +916,7 @@ const FuelLoad = () => {
 
       <CCard>
         <CCardHeader
+          className="pb-3 pt-3"
           style={{
             background: '#4B79A1',
             color: 'white',
@@ -927,9 +928,7 @@ const FuelLoad = () => {
             // marginLeft: sidebarShow ? '250px' : '0',
           }}
         >
-          <div className="pb-1 pt-1">
-            <h6 className="mb-0 fw-bold">Fuel Loading</h6>
-          </div>
+          <h6 className="mb-0 fw-bold">Fuel Loading</h6>
         </CCardHeader>
         <div className="d-flex justify-content-between align-items-center">
           <div className="mb-2 mt-3 ms-3 d-flex align-items-center">
