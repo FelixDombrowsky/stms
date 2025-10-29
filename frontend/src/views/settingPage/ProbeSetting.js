@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import classNames from 'classnames'
 import axios from 'axios'
-import { useTranslation } from '../../../node_modules/react-i18next'
 import {
   CAvatar,
   CButton,
@@ -173,10 +171,6 @@ const ProbeSetting = () => {
         console.error('Error Fetching data:', err)
       })
   }, [])
-
-  const { t } = useTranslation()
-
-  const [details, setDetails] = useState([])
 
   return (
     <>

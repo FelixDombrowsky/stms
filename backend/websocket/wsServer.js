@@ -75,13 +75,15 @@ export const initWebSocket = (server) => {
 
       for (const raw of rawArray) {
         const info = tankCache.get(raw.probe_id)
+        // console.log("Info : ", info)
+        // console.log("raw :", raw)
         if (!info) continue
         formatted.push(formatTankData(raw, info))
       }
 
       // console.log("formatted :", formatted)
-      console.log("Formatted ", formatted)
-      console.log("Formatted type ", typeof formatted)
+      // console.log("Formatted ", formatted)
+      // console.log("Formatted type ", typeof formatted)
       // const mockFormatted = formatted.map((item) => {
       //   // สุ่มความสูงน้ำมัน (เช่น 0–1000 mm)
       //   const oilHeight = Math.random() * 1000;

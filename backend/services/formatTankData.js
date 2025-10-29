@@ -10,10 +10,21 @@ export const formatTankData = (raw, info) => {
     return baseResult(info, 0, 0, 0, 0, 0, 0, 0, "modbus_error", raw.timestamp)
   }
 
+  // console.log("Raw :", raw.probe_id)
+
   // --- 2) เตรียมค่าเริ่มต้น ---
   let oil_h = Number(raw.oil_h ?? 0)
   let water_h = Number(raw.water_h ?? 0)
   const temp = raw.temp != null ? Number(parseFloat(raw.temp).toFixed(1)) : 0
+
+  // Special for probe id 3
+
+  if (raw.probe_id === 3) {
+    // console.log("oil_before : ", oil_h)
+    // console.log("Probe Id :", 3)
+    oil_h = Number((0.85652 * oil_h - 142.834).toFixed(0))
+    // console.log("oil_after : ", oil_h)
+  }
 
   const tankType = Number(info.tank_type || 0)
   const density = info.density && info.density > 0 ? info.density : 1
@@ -79,14 +90,24 @@ export const formatTankData = (raw, info) => {
 
   // --- 9) หา Status ---
   let status = "normal"
+  console.log("oil_v, high_alarm", {
+    oil_v: oil_volume,
+    high_alarm: info.high_alarm_l,
+  })
+  console.log("oil_v, high_alert", {
+    oil_v: oil_volume,
+    high_alert: info.high_alert_l,
+  })
   if (info.high_alarm_l && oil_volume >= info.high_alarm_l)
     status = "high_alarm"
-  else if (info.high_alert && oil_volume >= info.high_alert)
+  else if (info.high_alert_l && oil_volume >= info.high_alert_l)
     status = "high_alert"
   else if (info.low_alarm_l && oil_volume <= info.low_alarm_l)
     status = "low_alarm"
   else if (info.water_high_alarm_l && water_volume >= info.water_high_alarm_l)
     status = "water_alarm"
+
+  console.log("Status : ", status)
 
   // --- 10) Return ---
   return {

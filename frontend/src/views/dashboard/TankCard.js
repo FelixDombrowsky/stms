@@ -32,7 +32,7 @@ const TankCard = ({ tank, theme }) => {
     case 'normal':
       statusName = 'Normal'
       statusColor = 'limegreen'
-      textColor = theme === 'dark' ? '#ffffff' : 'black'
+      textColor = 'limegreen'
       cardColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
       break
 
@@ -40,42 +40,42 @@ const TankCard = ({ tank, theme }) => {
     case 'no_probe':
       statusName = tank.status === 'no_port' ? 'No Port' : 'No Probe'
       statusColor = 'red'
-      textColor = 'red'
+      textColor = '#f51919ff'
       cardColor = theme === 'dark' ? 'rgba(217, 217, 217, 0)' : 'rgba(217,217,217,0.1)'
       break
 
     case 'high_alarm':
       statusName = 'High Alarm'
       statusColor = 'limegreen'
-      textColor = 'red'
+      textColor = '#f51919ff'
       cardColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
       break
 
     case 'low_alarm':
       statusName = 'Low Alarm'
       statusColor = 'limegreen'
-      textColor = 'red'
+      textColor = '#f51919ff'
       cardColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
       break
 
     case 'water_high_alarm':
       statusName = 'Water High'
       statusColor = 'limegreen'
-      textColor = 'red'
+      textColor = '#f51919ff'
       cardColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
       break
 
     case 'high_alert':
       statusName = 'High Alert'
       statusColor = 'limegreen'
-      textColor = 'orange'
+      textColor = '#f49213ff'
       cardColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
       break
 
     default:
       statusName = '-'
-      statusColor = 'gray'
-      textColor = theme === 'dark' ? '#ffffff' : 'black'
+      statusColor = '#999'
+      textColor = theme === 'dark' ? '#ffffff' : '#111'
       cardColor = theme === 'dark' ? 'rgba(217,217,217,0.05)' : 'rgba(217,217,217,0.1)'
       break
   }
@@ -721,10 +721,11 @@ const TankCard = ({ tank, theme }) => {
       >
         <div className="d-flex align-items-center justify-content-between mb-2">
           <span
-            className="fw-semibold"
+            className="fw-bold"
             style={{
               fontSize: '1rem',
-              color: theme === 'dark' ? '#fff' : '#111',
+              // color: theme === 'dark' ? '#fff' : '#111',
+              color: textColor,
             }}
           >
             {statusName}
