@@ -43,42 +43,49 @@ const _nav = [
     to: '/function/fuelLoad',
     icon: <CIcon icon={cilColorFill} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: <Translation>{(t) => t('Leak Test')}</Translation>,
-    to: '/function/leakTest',
-    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: <Translation>{(t) => t('Leak Test')}</Translation>,
+  //   to: '/function/leakTest',
+  //   icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
+  // },
   {
     component: CNavTitle,
     name: <Translation>{(t) => t('Reports')}</Translation>,
   },
+  // {
+  //   component: CNavGroup,
+  //   name: <Translation>{(t) => t('Reports')}</Translation>,
+  //   to: '/report',
+  //   icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
+  //   items: [
+  //     {
+  //       component: CNavItem,
+  //       name: 'Fuel Level Report',
+  //       to: '/report/fuelLevel',
+  //     },
+
+  //     // {
+  //     //   component: CNavItem,
+  //     //   name: 'Fuel Load Report',
+  //     //   to: '/base/breadcrumbs',
+  //     // },
+  //     // {
+  //     //   component: CNavItem,
+  //     //   name: 'Leak Test Report',
+  //     //   to: '/base/calendar',
+  //     //   // badge: {
+  //     //   //   color: 'danger-gradient',
+  //     //   //   text: 'PRO',
+  //     //   // },
+  //     // },
+  //   ],
+  // },
   {
-    component: CNavGroup,
-    name: <Translation>{(t) => t('Reports')}</Translation>,
-    to: '/base',
-    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Fuel Level Report',
-        to: '/base/accordion',
-      },
-      {
-        component: CNavItem,
-        name: 'Fuel Load Report',
-        to: '/base/breadcrumbs',
-      },
-      {
-        component: CNavItem,
-        name: 'Leak Test Report',
-        to: '/base/calendar',
-        // badge: {
-        //   color: 'danger-gradient',
-        //   text: 'PRO',
-        // },
-      },
-    ],
+    component: CNavItem,
+    name: <Translation>{(t) => t('Fuel Level')}</Translation>,
+    to: '/report/fuelLevel',
+    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,
